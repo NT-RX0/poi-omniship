@@ -62,7 +62,7 @@ getDeckState = (deck) ->
   state
 
 module.exports =
-  name: 'omniship'
+  name: 'OmniShip'
   priority: 100000.1
   displayName: <span><FontAwesome key={0} name='bars' /> Mini舰队</span>
   description: '舰队展示页面，展示舰队详情信息'
