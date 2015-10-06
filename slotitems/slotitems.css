@@ -1,0 +1,60 @@
+.slotitems-mini .slotitem-container .item-improvment
+{
+    margin-left: 5px;
+}
+
+.slotitems-mini .slotitem-container
+{
+    position: relative;
+
+    display: inline;
+    text-align: left;
+    vertical-align: bottom;
+}
+.slotitems-mini .slotitem-container span.show
+{
+    display: inline !important;
+}
+.slotitems-mini .slotitem-container img
+{
+    width: 24px;
+    height: 24px;
+}
+
+.slotitems .slotitem-container .item-improvment
+{
+    margin-left: 5px;
+}
+.slotitems .slotitem-container
+{
+    position: relative;
+
+    display: inline;
+
+    vertical-align: bottom;
+}
+.slotitems .slotitem-container .slotitem-onslot
+{
+    font-size: 9px;
+
+    position: absolute;
+    top: -9px;
+    left: -1px;
+
+    padding: 2px;
+
+    border-radius: 4px;
+}
+.slotitems .slotitem-container span.slotitem-onslot
+{
+    padding: 2px 2px;
+}
+.slotitems .slotitem-container span.show
+{
+    display: inline !important;
+}
+.slotitems .slotitem-container img
+{
+    width: 24px;
+    height: 24px;
+}

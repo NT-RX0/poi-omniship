@@ -1,0 +1,17 @@
+/* for flex layout */
+.flex-row
+{
+    display: flex;
+
+    flex-flow: row nowrap;
+}
+.flex-column
+{
+    display: flex;
+
+    flex-flow: column nowrap;
+}
+.flex-wrap
+{
+    flex-wrap: wrap;
+}
