@@ -1,25 +1,24 @@
 {relative, join} = require 'path-extra'
 {_, $, $$, React, ReactBootstrap, ROOT, toggleModal} = window
 {layout, tabbed} = window
-{$ships, $shipTypes, _ships} = window
 {Button, ButtonGroup} = ReactBootstrap
 {ProgressBar, OverlayTrigger, Tooltip, Alert, Overlay, Label, Panel, Popover} = ReactBootstrap
 {__, __n} = require 'i18n'
+
+DI = require './data-interface'
+PaneBody = require './panebody'
 
 # customized renderers
 {LayoutPortrait, LayoutLandscape} = require './renderers'
 ThemeRenderer = window.ThemeRenderer['#{@name}']
 
-# data interface
-# deck[]
-# ship[]
+# TODO
+# [ ] 1. prepare data
+#   deck cond
+# [ ] 2. transform renderer
+# [ ] 3. rework layout
+# [ ] 4. add combined fleet, detailed fleet, battle fleet
 
-# {getDeckState} = require './deck-info'
-PaneBody = require './panebody'
-
-inBattle = [false, false, false, false]
-goback = {}
-combined = false
 escapeId = -1
 towId = -1
 
@@ -35,32 +34,6 @@ getStyle = (state) ->
   else
     return 'default'
 
-getDeckState = (deck) ->
-  state = 0
-  {$ships, _ships} = window
-  # In mission
-  if inBattle[deck.api_id - 1]
-    state = Math.max(state, 5)
-  if deck.api_mission[0] > 0
-    state = Math.max(state, 4)
-  for shipId in deck.api_ship
-    continue if shipId == -1
-    ship = _ships[shipId]
-    shipInfo = $ships[ship.api_ship_id]
-    # Cond < 20 or medium damage
-    if ship.api_cond < 20 || ship.api_nowhp / ship.api_maxhp < 0.25
-      state = Math.max(state, 2)
-    # Cond < 40 or heavy damage
-    else if ship.api_cond < 40 || ship.api_nowhp / ship.api_maxhp < 0.5
-      state = Math.max(state, 1)
-    # Not supplied
-    if ship.api_fuel / shipInfo.api_fuel_max < 0.99 || ship.api_bull / shipInfo.api_bull_max < 0.99
-      state = Math.max(state, 1)
-    # Repairing
-    if shipId in window._ndocks
-      state = Math.max(state, 3)
-  state
-
 module.exports =
   name: 'OmniShip'
   priority: 100000.1
@@ -70,18 +43,31 @@ module.exports =
     getInitialState: ->
       names: ["#{__ 'I'}", "#{__ 'II'}", "#{__ 'III'}", "#{__ 'IV'}"]
       fullnames: [__('No.%s fleet', 1), __('No.%s fleet', 2), __('No.%s fleet', 3), __('No.%s fleet', 4)]
-      states: [-1, -1, -1, -1]
-      decks: []
       activeDeck: 0
       dataVersion: 0
     showDataVersion: 0
-    condStartTime: {}
+    data:
+      decks:
+        # 0: Cond >= 40, Supplied, Repaired, In port
+        # 1: 20 <= Cond < 40, or not supplied, or medium damage
+        # 2: Cond < 20, or heavy damage
+        # 3: Repairing
+        # 4: In mission
+        # 5: In battle
+        # 6: Akashi repairing
+        state = [-1, -1, -1, -1]
+        inBattle = [false, false, false, false]
+        akashiTimeStamp: 0
+      ships:
+        condTimeStamps: {}
+      combined:
+        # 0 is single fleet, 1 for aerial fleet, 2 for water surface fleet
+        state = 0
+        goback = []
     shouldComponentUpdate: (nextProps, nextState)->
       # if ship-pane is visibile and dataVersion is changed, this pane should update!
       if nextProps.selectedKey is @props.index and nextState.dataVersion isnt @showDataVersion
         @showDataVersion = nextState.dataVersion
-        return true
-      if @state.decks.length is 0 and nextState.decks.length isnt 0
         return true
       false
     handleClick: (idx) ->
@@ -91,56 +77,89 @@ module.exports =
           dataVersion: @state.dataVersion + 1
     handleResponse: (e) ->
       {method, path, body, postBody} = e.detail
-      {names} = @state
-      flag = true
       switch path
         when '/kcsapi/api_port/port'
-          # names = body.api_deck_port.map (e) -> e.api_name
-          inBattle = [false, false, false, false]
-          for shipId of _ships
-            t = new Date().getTime()
-            if @condStartTime[shipId]?
-              if _ships[shipId].api_cond >= 49
-                @condStartTime[shipId] = 0
-                continue
-              if @condStartTime[shipId] > 0
-                step = (t - @condStartTime[shipId]) / (3 * 60 * 1000)
-                if step >= 1
-                  # forward time
-                  @condStartTime[shipId] += 3 * 60 * 1000 * Math.floor(step)
-              else
-                @condStartTime[shipId] = t
-            else
-              @condStartTime[shipId] = t
-            # Math.ceil((49 - _ships[shipId].api_cond) / 3) * 3 * 60 * 1000 + t.getTime()
-        when '/kcsapi/api_req_hensei/change', '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_get_member/ship3',  '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
+          {_decks} = window
+          # update combined state
+          if body.api_combined_flag?
+            @data.combined.state = body.api_combined_flag
+          # update cond
+          @data.ships.condTimeStamps = DI.getShipCondStamps(@data.ships.condTimeStamps)
+          # update akashi
+          if DI.isAkashiRepairing(_decks[0])
+            if @data.decks.akashiTimeStamp == 0
+              @data.decks.akashiTimeStamp = Date.now()
+          else
+            @data.decks.akashiTimeStamp = 0
+        when '/kcsapi/api_req_hensei/change'
+          {_decks} = window
+          # update akashi
+          if DI.isAkashiRepairing(_decks[0])
+            if @data.decks.akashiTimeStamp == 0
+              @data.decks.akashiTimeStamp = Date.now()
+          else
+            @data.decks.akashiTimeStamp = 0
+        when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_get_member/ship3', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
           true
         when '/kcsapi/api_req_kousyou/destroyship'
+          # update cond
           shipId = parseInt postBody.api_ship_id
-          delete @condStartTime[shipId]
-          true
+          delete @data.ships.condTimeStamps[shipId]
         when '/kcsapi/api_req_map/start'
+          # update deck state
           deckId = parseInt(postBody.api_deck_id) - 1
-          inBattle[deckId] = true
-          {decks, states} = @state
-          {_ships} = window
-          deck = decks[deckId]
-        else
-          flag = false
-      return unless flag
-      decks = window._decks
-      states = decks.map (deck) ->
-        getDeckState deck
+          @data.decks.inBattle[deckId] = true
+        when '/kcsapi/api_req_sortie/battleresult', '/kcsapi/api_req_combined_battle/battleresult'
+          {_decks} = window
+          # update goback ids
+          if body.api_escape_flag? and body.api_escape_flag > 0
+            escapeIdx = body.api_escape.api_escape_idx[0] - 1
+            towIdx = body.api_escape.api_tow_idx[0] - 1
+            escapeId = _decks[escapeIdx // 6].api_ship[escapeIdx % 6]
+            towId = _decks[towIdx // 6].api_ship[towIdx % 6]
+        when '/kcsapi/api_req_combined_battle/goback_port'
+          if escapeId != -1 and towId != -1
+            # console.log "退避：#{_ships[escapeId].api_name} 护卫：#{_ships[towId].api_name}"
+            @data.combined.goback.push escapeId
+            @data.combined.goback.push towId
+        when '/kcsapi/api_req_map/start', '/kcsapi/api_req_map/next'
+          combined = @data.combined.state > 0
+          {inBattle} = @data.decks
+          {goback} = @data.combined
+          {_ships, _slotitems, _decks} = window
+          if path == '/kcsapi/api_req_map/start'
+            if combined && parseInt(postBody.api_deck_id) == 1
+              deckId = 0
+              inBattle[0] = inBattle[1] = true
+            else
+              deckId = parseInt(postBody.api_deck_id) - 1
+              inBattle[deckId] = true
+          # Heavy damaged Alert
+          escapeId = towId = -1
+          damagedShips = []
+          for deckId in [0..3]
+            continue unless inBattle[deckId]
+            deck = _decks[deckId]
+            for shipId, idx in deck.api_ship
+              continue if shipId == -1 or idx == 0
+              ship = _ships[shipId]
+              if ship.api_nowhp / ship.api_maxhp < 0.250001 and shipId not in goback
+                # 应急修理要员/女神
+                safe = false
+                for slotId in ship.api_slot.concat(ship.api_slot_ex || -1)
+                  continue if slotId == -1
+                  safe = true if _slotitems[slotId].api_type[3] is 14
+                if !safe
+                  damagedShips.push("Lv. #{ship.api_lv} - #{ship.api_name}")
+          if damagedShips.length > 0
+            toggleModal __('Attention!'), damagedShips.join(' ') + __('is heavily damaged!')
+      @data.decks.state = _decks.map DI.getDeckState()
       @setState
-        names: names
-        decks: decks
-        states: states
         dataVersion: @state.dataVersion + 1
     componentDidMount: ->
       window.addEventListener 'game.response', @handleResponse
     componentWillUnmount: ->
       window.removeEventListener 'game.response', @handleResponse
-      @interval = clearInterval @interval if @interval?
     # Conditional Renderer Sample
     # componentWillMount: ->
     #   if layout == 'horizontal'
@@ -166,10 +185,8 @@ module.exports =
           for deck, i in @state.decks
             <div className="ship-deck" className={if @state.activeDeck is i then 'show' else 'hidden'} key={i}>
               <PaneBody
-                condStartTime={@condStartTime}
                 key={i}
                 deckIndex={i}
-                deck={@state.decks[i]}
                 activeDeck={@state.activeDeck}
                 deckName={@state.names[i]}
               />

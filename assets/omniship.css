@@ -1,14 +1,14 @@
-.transforship {
+#OmniShip {
     font-size:100%;
 }
 
 
-.transforship:last-child {
+#OmniShip:last-child {
     margin-right:8px;
 }
 
 
-.transforship .btn-group {
+#OmniShip .btn-group {
     display:flex;
     width:100%;
     padding-right:5px;
@@ -16,35 +16,35 @@
 }
 
 
-.transforship .btn-group .btn {
+#OmniShip .btn-group .btn {
     padding:7px;
     flex:1;
 }
 
 
-.transforship .hidden {
+#OmniShip .hidden {
     display:none;
 }
 
 
-.transforship .show {
+#OmniShip .show {
     display:block;
 }
 
 
-.transforship .deckStatus {
+#OmniShip .deckStatus {
     padding-right:0;
     padding-left:0;
     text-align:center;
 }
 
 
-.transforship .progress {
+#OmniShip .progress {
     margin-bottom:5px;
 }
 
 
-.transforship .ship-more {
+#OmniShip .ship-more {
     display:inline-block;
     width:8px;
     height:8px;
@@ -54,29 +54,29 @@
 }
 
 
-.transforship .rec-progress {
+#OmniShip .rec-progress {
     display:block;
     margin:5px;
     flex:1;
 }
 
 
-.transforship .rec-progress .progress-bar {
+#OmniShip .rec-progress .progress-bar {
     margin:0;
 }
 
 
-.transforship .rec-progress .progress-bar:last-child:before {
+#OmniShip .rec-progress .progress-bar:last-child:before {
     background-color:rgba(0, 0, 0, .2);
 }
 
 
-.transforship .ship-details {
+#OmniShip .ship-details {
     margin-bottom:1px;
 }
 
 
-.transforship .ship-details .ship-tile {
+#OmniShip .ship-details .ship-tile {
     display:flex;
     margin:5px 5px 5px 0;
 
@@ -86,7 +86,7 @@
 }
 
 
-.transforship .ship-details .ship-item {
+#OmniShip .ship-details .ship-item {
     display:flex;
     overflow:hidden;
     white-space:nowrap;
@@ -99,7 +99,7 @@
 }
 
 
-.transforship .ship-details .status-label {
+#OmniShip .ship-details .status-label {
     position:relative;
     z-index:100;
     top:-2px;
@@ -116,12 +116,12 @@
 }
 
 
-.transforship .status-label .label {
+#OmniShip .status-label .label {
     padding:4px 6px;
 }
 
 
-.transforship .ship-details .ship-item .ship-info {
+#OmniShip .ship-details .ship-item .ship-info {
     font-size:12px;
     display:flex;
     width:100%;
@@ -141,18 +141,18 @@
 }
 
 
-.transforship .ship-details .ship-item .ship-info .ship-lv {
+#OmniShip .ship-details .ship-item .ship-info .ship-lv {
     flex:none;
     align-self:flex-start;
 }
 
 
-.transforship .ship-details .ship-item .ship-info .shipType {
+#OmniShip .ship-details .ship-item .ship-info .shipType {
     margin-left:5px;
 }
 
 
-.transforship .ship-details .ship-item .ship-info .ship-name {
+#OmniShip .ship-details .ship-item .ship-info .ship-name {
     overflow:hidden;
     margin-left:5px;
     white-space:nowrap;
@@ -161,7 +161,7 @@
 }
 
 
-.transforship .ship-details .ship-item .ship-cond {
+#OmniShip .ship-details .ship-item .ship-cond {
     margin-left:5px;
     flex:none;
     align-self:flex-end;
@@ -177,7 +177,7 @@
 }
 
 
-.transforship .ship-details .ship-item .ship-cond .cond-indicator {
+#OmniShip .ship-details .ship-item .ship-cond .cond-indicator {
     display:inline-block;
     width:4px;
     height:30px;
@@ -186,26 +186,26 @@
 }
 
 
-/*.transforship .ship-details .cond-bar {
+/*#OmniShip .ship-details .cond-bar {
   margin-top: 3px;
 }
-.transforship .ship-details .condtext {
+#OmniShip .ship-details .condtext {
   font-size: 60%;
   margin-right: 4px;
   flex: none;
   line-height: 1;
 }
-.transforship .ship-details .cond-progress {
+#OmniShip .ship-details .cond-progress {
   width: 100%;
 }
-.transforship .ship-details .cond-progress .progress-bar {
+#OmniShip .ship-details .cond-progress .progress-bar {
 
 }
-.transforship .ship-details .cond-progress .progress-bar:last-child:before {
+#OmniShip .ship-details .cond-progress .progress-bar:last-child:before {
   content: attr(data-content);
   background-color: #292929;
 }*/
-.transforship .ship-item .ship-hp {
+#OmniShip .ship-item .ship-hp {
     display:flex;
     flex-direction:row;
     flex:2;
@@ -215,7 +215,7 @@
 }
 
 
-.transforship .ship-item .ship-hp-text {
+#OmniShip .ship-item .ship-hp-text {
     font-size:60%;
     line-height:1;
     margin-right:4px;
@@ -223,7 +223,7 @@
 }
 
 
-.transforship .hp-progress {
+#OmniShip .hp-progress {
     vertical-align:bottom;
 
 
@@ -232,12 +232,12 @@
 }
 
 
-.transforship .hp-progress .progress {
+#OmniShip .hp-progress .progress {
     height:6px;
 }
 
 
-.transforship .hp-progress .progress .progress-bar {
+#OmniShip .hp-progress .progress .progress-bar {
     font-size:11px;
     line-height:.9;
 
@@ -246,19 +246,19 @@
 }
 
 
-.transforship .hp-progress .progress {
+#OmniShip .hp-progress .progress {
     position:relative;
 }
 
 
-.transforship .hp-progress .progress-bar span span {
+#OmniShip .hp-progress .progress-bar span span {
     position:absolute;
     display:block;
     width:100%;
 }
 
 
-.transforship .ship-details .ship-item .ship-fuelbullet {
+#OmniShip .ship-details .ship-item .ship-fuelbullet {
     display:flex;
     flex-direction:row;
     margin-left:4px;
@@ -269,11 +269,11 @@
 }
 
 
-.transforship .ship-details .ship-item .ship-fuelbullet .progress {
+#OmniShip .ship-details .ship-item .ship-fuelbullet .progress {
     width:6px;
 }
 
-.transforship .ship-details .ship-item .ship-slot
+#OmniShip .ship-details .ship-item .ship-slot
 {
     width: 120px;
     margin-right: 4px;
@@ -283,7 +283,7 @@
     flex: none;
 }
 
-.transforship .alert {
+#OmniShip .alert {
     margin-top:9px;
     text-align:center;
     border-color:transparent;
