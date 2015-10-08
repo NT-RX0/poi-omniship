@@ -13,8 +13,8 @@ PaneBody = require './panebody'
 ThemeRenderer = window.ThemeRenderer['#{@name}']
 
 # TODO
-# [ ] 1. prepare data
-#   deck cond
+# [x] 1. prepare data
+#    [\] deck cond
 # [ ] 2. transform renderer
 # [ ] 3. rework layout
 # [ ] 4. add combined fleet, detailed fleet, battle fleet

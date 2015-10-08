@@ -151,6 +151,23 @@ class DataInterface =
     fuel: fuel
     bullet: bullet
 
+  getDeckCondRemain: (deck, condStamps) ->
+    complete = 0
+    remains = deck.api_id.map (id) -> getShipCondComplete(id, condStamps) - condStamps[id]
+    longest = remains.reduce (a, b) -> Math.max(a, b)
+
+  getDeckMissionRemain: (deck) ->
+    if deck.api_mission[0] == 0
+      return 0
+    remain = deck.api_mission[2] - Date.now()
+
+  getDeckRepairRemain: (deck) ->
+    remains = [0]
+    deck.api_ship.map (id) ->
+      if id in window._ndocks
+        remains.push id
+    remain = remains.reduce (a, b) -> Math.max(a, b)
+
   isAkashiRepairing: (deck) ->
     {$ships, $slotitems, _slotitems, _ships, _ndocks} = window
     workShip = 19
@@ -173,39 +190,43 @@ class DataInterface =
           return = true
     return false
 
-  # 0: Cond >= 40, Supplied, Repaired, In port
-  # 1: 20 <= Cond < 40, or not supplied, or medium damage
-  # 2: Cond < 20, or heavy damage
-  # 3: Repairing
-  # 4: In mission
-  # 5: In map
-  # 6: Akashi Repairing
-  getDeckState: (deck) ->
+  # priority: ready | not suggested | can't sortie
+  # 0: Cond >= 40, Supplied, Repaired, In port     --- green
+  # 1: Akashi Repairing                            --- bright blue
+  # 2: low Cond < 30, but supplied                 --- light orange
+  # 3: not supplied or medium damaged              --- orange
+  # 4: heavy damage                                --- red
+  # 5: Repairing                                   --- blue
+  # 6: In mission                                  --- grey
+  # 7: In map                                      --- primary / high contrast
+  getDeckState: (deck, deckData) ->
     state = 0
     {$ships, _ships} = window
-    if isAkashiRepairing(deck)
-      state = Math.max(state, 6)
-    # In mission
-    if deck.inBattle[deck.api_id - 1]
-      state = Math.max(state, 5)
+    if deckData.inBattle[deck.api_id - 1]
+      return state = Math.max(state, 7)
     if deck.api_mission[0] > 0
-      state = Math.max(state, 4)
+      return state = Math.max(state, 6)
     for shipId in deck.api_ship
       continue if shipId == -1
       ship = _ships[shipId]
       shipInfo = $ships[ship.api_ship_id]
-      # Cond < 20 or heavy damage
-      if ship.api_cond < 20 || ship.api_nowhp / ship.api_maxhp < 0.25
-        state = Math.max(state, 2)
-      # Cond < 40 or medium damage
-      else if ship.api_cond < 40 || ship.api_nowhp / ship.api_maxhp < 0.5
-        state = Math.max(state, 1)
-      # Not supplied
-      if ship.api_fuel / shipInfo.api_fuel_max < 0.99 || ship.api_bull / shipInfo.api_bull_max < 0.99
-        state = Math.max(state, 1)
       # Repairing
       if shipId in window._ndocks
+        return state = Math.max(state, 5)
+      # heavy damaged
+      if (ship.api_nowhp / ship.api_maxhp) < 0.25
+        state = Math.max(state, 4)
+      # damaged
+      if (ship.api_nowhp / ship.api_maxhp) < 0.75
         state = Math.max(state, 3)
+      # Not supplied
+      if (ship.api_fuel / shipInfo.api_fuel_max) < 0.99 || (ship.api_bull / shipInfo.api_bull_max) < 0.99
+        state = Math.max(state, 3)
+      # low cond
+      if ship.api_cond <= 30
+        state = Math.max(state, 2)
+    if @isAkashiRepairing(deck)
+      state = Math.max(state, 1)
     state
 
   ###################
@@ -213,6 +234,7 @@ class DataInterface =
   ###################
   # most directly from _ships[shipId]
 
+  # condStamps = {shipId: startTimeStamp, ...}
   getShipCondStamps: (condStamps) ->
     {$ships, _ships} = window
     for ship in _ships
