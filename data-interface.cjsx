@@ -191,7 +191,7 @@ class DataInterface =
     return false
 
   # priority: ready | not suggested | can't sortie
-  # 0: Cond >= 40, Supplied, Repaired, In port     --- green
+  # 0: Cond > 30, Supplied, Repaired, In port      --- green
   # 1: Akashi Repairing                            --- bright blue
   # 2: low Cond < 30, but supplied                 --- light orange
   # 3: not supplied or medium damaged              --- orange
