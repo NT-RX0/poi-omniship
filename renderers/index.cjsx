@@ -1,3 +1,3 @@
 module.exports =
-  LayoutLandscape: require './layout-landescape'
+  LayoutLandscape: require './layout-landscape'
   LayoutPortrait: require './layout-portrait'

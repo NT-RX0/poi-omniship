@@ -12,7 +12,8 @@ class DataInterface
 
   # Tyku
   # 制空値 = [(艦載機の対空値) × √(搭載数)] の総計 + 熟練補正
-  getTyku: (deck) ->
+  # [T]
+  getDeckTyku: (deck) ->
     {$ships, $slotitems, _ships, _slotitems} = window
     basicTyku = alvTyku = totalTyku = 0
     for shipId in deck.api_ship
@@ -41,7 +42,8 @@ class DataInterface
 
   # Saku (2-5 旧式)
   # 偵察機索敵値×2 ＋ 電探索敵値 ＋ √(艦隊の装備込み索敵値合計 - 偵察機索敵値 - 電探索敵値)
-  getSaku25: (deck) ->
+  # [T]
+  getDeckSaku25: (deck) ->
     {$ships, $slotitems, _ships, _slotitems} = window
     reconSaku = shipSaku = radarSaku = 0
     for shipId in deck.api_ship
@@ -75,7 +77,8 @@ class DataInterface
   # 索敵スコア = 艦上爆撃機 × (1.04) + 艦上攻撃機 × (1.37) + 艦上偵察機 × (1.66) + 水上偵察機 × (2.00)
   #            + 水上爆撃機 × (1.78) + 小型電探 × (1.00) + 大型電探 × (0.99) + 探照灯 × (0.91)
   #            + √(各艦毎の素索敵) × (1.69) + (司令部レベルを5の倍数に切り上げ) × (-0.61)
-  getSaku25a: (deck) ->
+  # [T]
+  getDeckSaku25a: (deck) ->
     {$ships, $slotitems, _ships, _slotitems} = window
     totalSaku = shipSaku = itemSaku = teitokuSaku = 0
     for shipId in deck.api_ship
@@ -114,7 +117,8 @@ class DataInterface
     teitoku: parseFloat(teitokuSaku.toFixed(2))
     total: parseFloat(totalSaku.toFixed(2))
 
-  getLvInfo: (deck) ->
+  # [T]
+  getDeckLvInfo: (deck) ->
     {$ships, $slotitems, _ships} = window
     totalLv = totalShip = 0
     for shipId in deck.api_ship
@@ -127,7 +131,8 @@ class DataInterface
     totalLv: totalLv
     avgLv: parseFloat(avgLv.toFixed(0))
 
-  getSpeed: (deck) ->
+  # [T]
+  getDeckSpeed: (deck) ->
     {$ships, $slotitems, _ships} = window
     # hi / low and more
     speed = 'hi'
@@ -139,7 +144,8 @@ class DataInterface
         break
     speed
 
-  getCost: (deck) ->
+  # [T]
+  getDeckCost: (deck) ->
     {$ships, $slotitems, _ships} = window
     fuel = bullet = 0
     for shipId in deck.api_ship
@@ -151,23 +157,40 @@ class DataInterface
     fuel: fuel
     bullet: bullet
 
+  # [T] 50%
   getDeckCondRemain: (deck, condStamps) ->
-    complete = 0
-    remains = deck.api_id.map (id) -> getShipCondComplete(id, condStamps) - condStamps[id]
+    that = this
+    remains = deck.api_ship.map (id) ->
+      complete = that.getShipCondComplete(id, condStamps)
+      if complete > 0
+        complete - condStamps[id]
+      else
+        0
     longest = remains.reduce (a, b) -> Math.max(a, b)
 
+  # [T]
   getDeckMissionRemain: (deck) ->
     if deck.api_mission[0] == 0
       return 0
     remain = deck.api_mission[2] - Date.now()
 
-  getDeckRepairRemain: (deck) ->
+  # [ ]
+  getDeckRepairRemain: (deck, ndocks) ->
     remains = [0]
+    repairings = []
     deck.api_ship.map (id) ->
       if id in window._ndocks
-        remains.push id
-    remain = remains.reduce (a, b) -> Math.max(a, b)
+        repairings.push id
+    if repairings.length == 0
+      return 0
+    for id in repairings
+      for i, ndock of ndocks
+        if id == ndock.api_ship_id
+          remains.push ndock.api_complete_time
+    maxRemain = remains.reduce (a, b) -> Math.max(a, b)
+    maxRemain - Date.now()
 
+  # [T]
   isAkashiRepairing: (deck) ->
     {$ships, $slotitems, _slotitems, _ships, _ndocks} = window
     workShip = 19
@@ -199,6 +222,7 @@ class DataInterface
   # 5: Repairing                                   --- blue
   # 6: In mission                                  --- grey
   # 7: In map                                      --- primary / high contrast
+  # [T]
   getDeckState: (deck, deckData) ->
     state = 0
     {$ships, _ships} = window
@@ -234,10 +258,11 @@ class DataInterface
   ###################
   # most directly from _ships[shipId]
 
+  # [T]
   # condStamps = {shipId: startTimeStamp, ...}
   getShipCondStamps: (condStamps) ->
     {$ships, _ships} = window
-    for ship in _ships
+    for shipId, ship of _ships
       if condStamps[ship.api_id]? 0 and ship.api_cond < 49
         # started
         continue
@@ -248,6 +273,7 @@ class DataInterface
         delete condStamps[ship.api_id]
     condStamps
 
+  # [ ]
   getShipCondComplete: (shipId, condStamps) ->
     {$ships, _ships} = window
     ship = _ships[shipId]
@@ -261,5 +287,15 @@ class DataInterface
       console.log 'requesting unexist timestamp'
     complete
 
-module.exports =
-  DataInterface: DataInterface
+module.exports = DataInterface
+
+### test code
+deck = _decks[0];
+path = require('path-extra');
+data = {};
+data.decks = {}; data.ships = {}; data.combined = {};
+data.ships.condStamps = {};
+omni = require(path.join(ROOT, 'plugins', 'compactview', 'parts', 'omniship'));
+data.ships.condStamps = omni.DI.getShipCondStamps(data.ships.condStamps);
+data.decks.inBattle = [false, false, false, false]
+###
