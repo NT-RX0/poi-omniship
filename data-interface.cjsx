@@ -5,7 +5,7 @@
 {OverlayTrigger, Tooltip, Overlay, Popover} = ReactBootstrap
 {__, __n} = require 'i18n'
 
-class DataInterface =
+class DataInterface
   ############
   # Deck Information
   ############
@@ -187,7 +187,7 @@ class DataInterface =
       for i in [1 .. akashiCapacity]
         ship = _ships[deck.api_ship[i]]
         if ship.api_nowhp < ship.api_maxhp and ship.api_id not in _ndocks
-          return = true
+          return true
     return false
 
   # priority: ready | not suggested | can't sortie

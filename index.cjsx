@@ -6,7 +6,7 @@
 {__, __n} = require 'i18n'
 
 DI = require './data-interface'
-PaneBody = require './panebody'
+# PaneBody = require './panebody'
 
 # customized renderers
 {LayoutPortrait, LayoutLandscape} = require './renderers'
@@ -37,33 +37,34 @@ getStyle = (state) ->
 module.exports =
   name: 'OmniShip'
   priority: 100000.1
-  displayName: <span><FontAwesome key={0} name='bars' /> Mini舰队</span>
-  description: '舰队展示页面，展示舰队详情信息'
+  displayName: <span><FontAwesome key={0} name='bars' /> 全能舰队</span>
+  description: '舰队展示页面，展示所有舰队信息'
+  DI: require './data-interface'
   reactClass: React.createClass
     getInitialState: ->
-      names: ["#{__ 'I'}", "#{__ 'II'}", "#{__ 'III'}", "#{__ 'IV'}"]
-      fullnames: [__('No.%s fleet', 1), __('No.%s fleet', 2), __('No.%s fleet', 3), __('No.%s fleet', 4)]
       activeDeck: 0
       dataVersion: 0
-    showDataVersion: 0
-    data:
-      decks:
-        # 0: Cond >= 40, Supplied, Repaired, In port
-        # 1: 20 <= Cond < 40, or not supplied, or medium damage
-        # 2: Cond < 20, or heavy damage
-        # 3: Repairing
-        # 4: In mission
-        # 5: In battle
-        # 6: Akashi repairing
-        state = [-1, -1, -1, -1]
-        inBattle = [false, false, false, false]
-        akashiTimeStamp: 0
-      ships:
-        condTimeStamps: {}
-      combined:
-        # 0 is single fleet, 1 for aerial fleet, 2 for water surface fleet
-        state = 0
-        goback = []
+      showDataVersion: 0
+      data:
+        decks:
+          names: ["#{__ 'I'}", "#{__ 'II'}", "#{__ 'III'}", "#{__ 'IV'}"]
+          fullnames: [__('No.%s fleet', 1), __('No.%s fleet', 2), __('No.%s fleet', 3), __('No.%s fleet', 4)]
+          # 0: Cond >= 40, Supplied, Repaired, In port
+          # 1: 20 <= Cond < 40, or not supplied, or medium damage
+          # 2: Cond < 20, or heavy damage
+          # 3: Repairing
+          # 4: In mission
+          # 5: In battle
+          # 6: Akashi repairing
+          state = [-1, -1, -1, -1]
+          inBattle = [false, false, false, false]
+          akashiTimeStamp: 0
+        ships:
+          condTimeStamps: {}
+        combined:
+          # 0 is single fleet, 1 for aerial fleet, 2 for water surface fleet
+          state = 0
+          goback = []
     shouldComponentUpdate: (nextProps, nextState)->
       # if ship-pane is visibile and dataVersion is changed, this pane should update!
       if nextProps.selectedKey is @props.index and nextState.dataVersion isnt @showDataVersion
@@ -184,12 +185,11 @@ module.exports =
         {
           for deck, i in @state.decks
             <div className="ship-deck" className={if @state.activeDeck is i then 'show' else 'hidden'} key={i}>
-              <PaneBody
-                key={i}
-                deckIndex={i}
-                activeDeck={@state.activeDeck}
-                deckName={@state.names[i]}
-              />
+              # <PaneBody
+              #   key={i}
+              #   activeDeck={@state.activeDeck}
+              #   data={@state.data}
+              # />
             </div>
         }
       </Panel>
