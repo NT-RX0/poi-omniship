@@ -101,7 +101,8 @@ module.exports =
           else
             data.decks.akashiTimeStamp = 0
         when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_get_member/ship3', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
-          true
+          # update cond
+          data.ships.condTimeStamps = DI.getShipCondStamps(data.ships.condTimeStamps)
         when '/kcsapi/api_req_kousyou/destroyship'
           # update cond
           shipId = parseInt postBody.api_ship_id
