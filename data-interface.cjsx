@@ -269,10 +269,12 @@ class DataInterface
       if ship.api_cond < 49
         if condStamps[ship.api_id]?
           # calibrate
+          ## move to same cond section
+          #
           t = Date.now()
           while Math.abs(t - condStamps[ship.api_id]) > 3 * 60 * 1000
             t -= 3 * 60 * 1000
-          if t < condStamps[ship.api_id]
+          if t > condStamps[ship.api_id]
             condStamps[ship.api_id] = t
           # clean
           complete = Math.ceil((49 - ship.api_cond) / 3) * (3 * 60 * 1000) + condStamps[ship.api_id]

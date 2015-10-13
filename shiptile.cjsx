@@ -5,7 +5,9 @@
 {ProgressBar, OverlayTrigger, Tooltip, Alert, Overlay, Label, Panel, Popover} = ReactBootstrap
 {__, __n} = require 'i18n'
 
-StatusLabelMini = require './statuslabelmini'
+
+{getShipStatus, reactClass} = require './statuslabelmini'
+StatusLabelMini = reactClass
 CondBar = require './condbar'
 RecoveryBar = require './recovery-bar'
 Slotitems = require './slotitems'
@@ -53,11 +55,18 @@ getStatusStyle = (status) ->
     return {}
 
 ShipTile = React.createClass
+  getInitialState: ->
+    label = -1
+  updateLabels: ->
+    # refresh label
+    {label} = @state
+    {_ships, _decks} = window
+    label = getShipStatus @props.ship.api_ship_id
   render: ->
-    {ship, shipInfo, shipType, label} = @props
+    {ship, shipInfo, shipType} = @props
     <div className="ship-tile">
       <div className="status-label">
-        <StatusLabelMini.reactClass label={label}/>
+        <StatusLabelMini label={label}/>
       </div>
       <div className="ship-item" style={getStatusStyle label}>
         <OverlayTrigger placement="top" overlay={

@@ -194,11 +194,11 @@ module.exports =
           {_decks} = window
           for deck, i in _decks
             <div className="ship-deck" className={if @state.activeDeck is i then 'show' else 'hidden'} key={i}>
-              # <PaneBody
-              #   key={i}
-              #   activeDeck={@state.activeDeck}
-              #   data={@state.data}
-              # />
+              <PaneBody
+                key={i}
+                activeDeck={@state.activeDeck}
+                data={@state.data}
+              />
             </div>
           }
         }
