@@ -52,7 +52,7 @@ PaneBody = React.createClass
     <div>
       <div style={display:"flex", justifyContent:"space-between", margin:"5px 0"}>
           <span className="ship-more" style={flex:"none"}><FontAwesome key={0} name='clock-o' /></span>
-        {# <RecoveryBar style={flex:"auto"} deck={@props.deck} deckIndex = {@props.deckIndex} repairTimer = {@state.repairTimer} missionTimer = {@state.missionTimer} condTimer = {@state.condTimer} /> }
+       # { <RecoveryBar style={flex:"auto"} deck={@props.deck} deckIndex = {@props.deckIndex} repairTimer = {@state.repairTimer} missionTimer = {@state.missionTimer} condTimer = {@state.condTimer} /> }
       </div>
       <div className="ship-details">
       {

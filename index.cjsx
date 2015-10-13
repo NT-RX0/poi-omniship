@@ -14,9 +14,9 @@ DataInterface = require './data-interface'
 
 # TODO
 # [x] 1. prepare data
-#    [\] deck cond
-#    [\] test code
-# [ ] 2. transform renderer
+#    [...] deck cond
+#    [x] test code
+# [\] 2. transform renderer
 # [ ] 3. rework layout
 # [ ] 4. add combined fleet, detailed fleet, battle fleet
 
@@ -39,14 +39,15 @@ module.exports =
   priority: 100000.1
   displayName: <span><FontAwesome key={0} name='bars' /> 全能舰队</span>
   description: '舰队展示页面，展示所有舰队信息'
-  DI: new DataInterface()
   reactClass: React.createClass
+    DI: new DataInterface()
     getInitialState: ->
       activeDeck: 0
       dataVersion: 0
       showDataVersion: 0
       data:
-        decks:
+        decks: []
+        decksAddition:
           names: ["#{__ 'I'}", "#{__ 'II'}", "#{__ 'III'}", "#{__ 'IV'}"]
           fullnames: [__('No.%s fleet', 1), __('No.%s fleet', 2), __('No.%s fleet', 3), __('No.%s fleet', 4)]
           # priority: ready | not suggested | can't sortie
@@ -62,7 +63,8 @@ module.exports =
           inBattle: [false, false, false, false]
           akashiTimeStamp: 0
           ndocks: {}
-        ships:
+        ships: {}
+        shipsAddition:
           condTimeStamps: {}
         combined:
           # 0 is single fleet, 1 for aerial fleet, 2 for water surface fleet
@@ -75,34 +77,35 @@ module.exports =
           dataVersion: @state.dataVersion + 1
     handleResponse: (e) ->
       {method, path, body, postBody} = e.detail
-      data = @state.data
+      {data} = @state
+      flag = true
       switch path
         when '/kcsapi/api_port/port'
-          {_decks} = window
+          decks = @state.data.decks
           # update combined state
           if body.api_combined_flag?
             data.combined.state = body.api_combined_flag
           # update cond
-          data.ships.condTimeStamps = DI.getShipCondStamps(data.ships.condTimeStamps)
+          data.ships.condTimeStamps = @DI.getShipCondStamps(data.ships.condTimeStamps)
           # update akashi
-          if DI.isAkashiRepairing(_decks[0])
-            if data.decks.akashiTimeStamp == 0
-              data.decks.akashiTimeStamp = Date.now()
+          if DI.isAkashiRepairing(decks[0])
+            if data.decksAddition.akashiTimeStamp == 0
+              data.decksAddition.akashiTimeStamp = Date.now()
           else
-            data.decks.akashiTimeStamp = 0
+            data.decksAddition.akashiTimeStamp = 0
           # save ndocks
-          data.decks.ndocks = body.api_ndock
+          data.decksAddition.ndocks = body.api_ndock
         when '/kcsapi/api_req_hensei/change'
-          {_decks} = window
+          decks = @state.data.decks
           # update akashi
-          if DI.isAkashiRepairing(_decks[0])
-            if data.decks.akashiTimeStamp == 0
-              data.decks.akashiTimeStamp = Date.now()
+          if DI.isAkashiRepairing(decks[0])
+            if data.decksAddition.akashiTimeStamp == 0
+              data.decksAddition.akashiTimeStamp = Date.now()
           else
-            data.decks.akashiTimeStamp = 0
+            data.decksAddition.akashiTimeStamp = 0
         when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_get_member/ship3', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
           # update cond
-          data.ships.condTimeStamps = DI.getShipCondStamps(data.ships.condTimeStamps)
+          data.ships.condTimeStamps = @DI.getShipCondStamps(data.ships.condTimeStamps)
         when '/kcsapi/api_req_kousyou/destroyship'
           # update cond
           shipId = parseInt postBody.api_ship_id
@@ -110,15 +113,15 @@ module.exports =
         when '/kcsapi/api_req_map/start'
           # update deck state
           deckId = parseInt(postBody.api_deck_id) - 1
-          data.decks.inBattle[deckId] = true
+          data.decksAddition.inBattle[deckId] = true
         when '/kcsapi/api_req_sortie/battleresult', '/kcsapi/api_req_combined_battle/battleresult'
-          {_decks} = window
+          decks = @state.data.decks
           # update goback ids
           if body.api_escape_flag? and body.api_escape_flag > 0
             escapeIdx = body.api_escape.api_escape_idx[0] - 1
             towIdx = body.api_escape.api_tow_idx[0] - 1
-            escapeId = _decks[escapeIdx // 6].api_ship[escapeIdx % 6]
-            towId = _decks[towIdx // 6].api_ship[towIdx % 6]
+            escapeId = decks[escapeIdx // 6].api_ship[escapeIdx % 6]
+            towId = decks[towIdx // 6].api_ship[towIdx % 6]
         when '/kcsapi/api_req_combined_battle/goback_port'
           if escapeId != -1 and towId != -1
             # console.log "退避：#{_ships[escapeId].api_name} 护卫：#{_ships[towId].api_name}"
@@ -126,9 +129,10 @@ module.exports =
             data.combined.goback.push towId
         when '/kcsapi/api_req_map/start', '/kcsapi/api_req_map/next'
           combined = data.combined.state > 0
-          {inBattle} = data.decks
+          decks = @state.data.decks
+          {inBattle} = data.decksAddition
           {goback} = data.combined
-          {_ships, _slotitems, _decks} = window
+          {_ships, _slotitems} = window
           if path == '/kcsapi/api_req_map/start'
             if combined && parseInt(postBody.api_deck_id) == 1
               deckId = 0
@@ -141,7 +145,7 @@ module.exports =
           damagedShips = []
           for deckId in [0..3]
             continue unless inBattle[deckId]
-            deck = _decks[deckId]
+            deck = decks[deckId]
             for shipId, idx in deck.api_ship
               continue if shipId == -1 or idx == 0
               ship = _ships[shipId]
@@ -155,7 +159,12 @@ module.exports =
                   damagedShips.push("Lv. #{ship.api_lv} - #{ship.api_name}")
           if damagedShips.length > 0
             toggleModal __('Attention!'), damagedShips.join(' ') + __('is heavily damaged!')
-      data.decks.state = _decks.map DI.getDeckState()
+        else
+          flag = false
+      return unless flag
+      {_decks} = window
+      data.decksAddition.state = _decks.map @DI.getDeckState()
+      data.decks = _decks
       @setState
         dataVersion: @state.dataVersion + 1
         data: data
@@ -165,11 +174,11 @@ module.exports =
       window.removeEventListener 'game.response', @handleResponse
     shouldComponentUpdate: (nextProps, nextState)->
       # if ship-pane is visibile and dataVersion is changed, this pane should update!
-      if nextProps.selectedKey is @props.index and nextState.dataVersion isnt @showDataVersion and !_.isEqual(prevState, nextState)
+      if nextProps.selectedKey is @props.index and nextState.dataVersion isnt @showDataVersion  and !_.isEqual(@state, nextState) and !_.isEqual(@props, nextProps)
         @showDataVersion = nextState.dataVersion
         return true
       false
-    # Conditional Renderer Sample
+    # # Conditional Renderer Sample
     # componentWillMount: ->
     #   if layout == 'horizontal'
     #     @render = ThemeRenderer || LayoutPortrait
@@ -183,16 +192,16 @@ module.exports =
         {
           for i in [0..3]
             <Button key={i} bsSize="small"
-                            bsStyle={getStyle @state.data.decks.state[i]}
+                            bsStyle={getStyle @state.data.decksAddition.state[i]}
                             onClick={@handleClick.bind(this, i)}
                             className={if @state.activeDeck == i then 'active' else ''}>
-              {@state.data.decks.names[i]}
+              {@state.data.decksAddition.names[i]}
             </Button>
         }
         </ButtonGroup>
         {
-          {_decks} = window
-          for deck, i in _decks
+          decks = @state.data.decks
+          for deck, i in decks
             <div className="ship-deck" className={if @state.activeDeck is i then 'show' else 'hidden'} key={i}>
               <PaneBody
                 key={i}
@@ -200,6 +209,5 @@ module.exports =
                 data={@state.data}
               />
             </div>
-          }
         }
       </Panel>
