@@ -14,9 +14,9 @@ PaneBody = require './panebody'
 
 # TODO
 # [x] 1. prepare data
-#    [...] deck cond
+#    [X] deck cond
 #    [x] test code
-# [\] 2. transform renderer
+# [X] 2. transform renderer
 # [ ] 3. rework layout
 # [ ] 4. add combined fleet, detailed fleet, battle fleet
 
@@ -198,7 +198,8 @@ module.exports =
       window.removeEventListener 'game.response', @handleResponse
     shouldComponentUpdate: (nextProps, nextState)->
       # if ship-pane is visibile and dataVersion is changed, this pane should update!
-      if nextState.dataVersion isnt @showDataVersion  and (!_.isEqual(@state, nextState) or !_.isEqual(@props, nextProps))
+      # TODO: add performance measurement
+      if nextState.dataVersion isnt @showDataVersion or !_.isEqual(@state, nextState) or !_.isEqual(@props, nextProps)
         @showDataVersion = nextState.dataVersion
         return true
       false

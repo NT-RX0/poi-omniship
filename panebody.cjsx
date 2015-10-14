@@ -44,7 +44,7 @@ PaneBody = React.createClass
   componentWillUnmount: ->
     window.removeEventListener 'game.response', @handleResponse
   shouldComponentUpdate: (nextProps, nextState) ->
-    nextProps.activeDeck is @props.deckIndex and !_.isEqual(nextState, @state)
+    nextProps.activeDeck is @props.deckIndex # and !_.isEqual(nextProps, @props)
   render: ->
     <div>
       <div style={display:"flex", justifyContent:"space-between", margin:"5px 0"}>
