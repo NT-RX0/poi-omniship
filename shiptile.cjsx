@@ -6,8 +6,8 @@
 {__, __n} = require 'i18n'
 
 
-{getShipStatus, reactClass} = require './statuslabelmini'
-StatusLabelMini = reactClass
+{getShipStatus, reactClass} = require './statuslabel'
+StatusLabel = reactClass
 CondBar = require './condbar'
 RecoveryBar = require './recovery-bar'
 Slotitems = require './slotitems'
@@ -56,17 +56,19 @@ getStatusStyle = (status) ->
 
 ShipTile = React.createClass
   getInitialState: ->
-    label = -1
+    label: -1
   updateLabels: ->
     # refresh label
     {label} = @state
     {_ships, _decks} = window
     label = getShipStatus @props.ship.api_ship_id
+    setState: {label: label}
   render: ->
     {ship, shipInfo, shipType} = @props
+    {label} = @state
     <div className="ship-tile">
       <div className="status-label">
-        <StatusLabelMini label={label}/>
+        <StatusLabel label={label}/>
       </div>
       <div className="ship-item" style={getStatusStyle label}>
         <OverlayTrigger placement="top" overlay={

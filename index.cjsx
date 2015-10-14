@@ -6,7 +6,7 @@
 {__, __n} = require 'i18n'
 
 DataInterface = require './data-interface'
-# PaneBody = require './panebody'
+PaneBody = require './panebody'
 
 # customized renderers
 {LayoutPortrait, LayoutLandscape} = require './renderers'
@@ -23,19 +23,23 @@ DataInterface = require './data-interface'
 escapeId = -1
 towId = -1
 
+#TODO: use css class instead of inline css
 getStyle = (state) ->
-  if state in [0..5]
-    # 0: Cond >= 40, Supplied, Repaired, In port
-    # 1: 20 <= Cond < 40, or not supplied, or medium damage
-    # 2: Cond < 20, or heavy damage
-    # 3: Repairing
-    # 4: In mission
-    # 5: In map
-    return ['success', 'warning', 'danger', 'info', 'default', 'primary'][state]
+  if state in [0..7]
+    # priority: ready | not suggested | can't sortie
+    # 0: Cond > 30, Supplied, Repaired, In port   --- green
+    # 1: Akashi Repairing                         --- bright blue
+    # 2: low Cond < 30, but supplied              --- light orange
+    # 3: not supplied or medium damaged           --- orange
+    # 4: heavy damage                             --- red
+    # 5: Repairing                                --- blue
+    # 6: In mission                               --- grey
+    # 7: In map                                   --- primary / high contrast
+    return ['#8BC34A', '#90CAF9', '#FBC02D', '#EF6C00', '#E53935', '#2196F3', '#26A69A', '#2E7D32'][state]
   'default'
 
 module.exports =
-  name: 'OmniShip'
+  name: 'omniship'
   priority: 100000.1
   displayName: <span><FontAwesome key={0} name='bars' /> 全能舰队</span>
   description: '舰队展示页面，展示所有舰队信息'
@@ -63,6 +67,7 @@ module.exports =
           inBattle: [false, false, false, false]
           akashiTimeStamp: 0
           ndocks: {}
+          condRemain: [0, 0, 0, 0]
         ships: {}
         shipsAddition:
           condTimeStamps: {}
@@ -80,36 +85,53 @@ module.exports =
       {data} = @state
       flag = true
       switch path
+        # TODO: 给粮舰 & 双飞
         when '/kcsapi/api_port/port'
           decks = @state.data.decks
           # update combined state
           if body.api_combined_flag?
             data.combined.state = body.api_combined_flag
           # update cond
-          data.ships.condTimeStamps = @DI.getShipCondStamps(data.ships.condTimeStamps)
+          data.shipsAddition.condTimeStamps = @DI.getShipCondStamps(data.shipsAddition.condTimeStamps)
+          deckCondRemain = []
+          for deck, i in decks
+            deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
+          data.decksAddition.condRemain = deckCondRemain
           # update akashi
-          if DI.isAkashiRepairing(decks[0])
+          if @DI.isAkashiRepairing(decks[0])
             if data.decksAddition.akashiTimeStamp == 0
               data.decksAddition.akashiTimeStamp = Date.now()
           else
             data.decksAddition.akashiTimeStamp = 0
           # save ndocks
           data.decksAddition.ndocks = body.api_ndock
+          # reset inbattle
+          data.decksAddition.inBattle = [false, false, false, false]
         when '/kcsapi/api_req_hensei/change'
           decks = @state.data.decks
           # update akashi
-          if DI.isAkashiRepairing(decks[0])
+          if @DI.isAkashiRepairing(decks[0])
             if data.decksAddition.akashiTimeStamp == 0
               data.decksAddition.akashiTimeStamp = Date.now()
           else
             data.decksAddition.akashiTimeStamp = 0
+          # update deck cond
+          deckCondRemain = []
+          for deck, i in decks
+            deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
+          data.decksAddition.condRemain = deckCondRemain
         when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_get_member/ship3', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
+          decks = @state.data.decks
           # update cond
-          data.ships.condTimeStamps = @DI.getShipCondStamps(data.ships.condTimeStamps)
+          data.shipsAddition.condTimeStamps = @DI.getShipCondStamps(data.shipsAddition.condTimeStamps)
+          deckCondRemain = []
+          for deck, i in decks
+            deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
+          data.decksAddition.condRemain = deckCondRemain
         when '/kcsapi/api_req_kousyou/destroyship'
           # update cond
           shipId = parseInt postBody.api_ship_id
-          delete data.ships.condTimeStamps[shipId]
+          delete data.shipsAddition.condTimeStamps[shipId]
         when '/kcsapi/api_req_map/start'
           # update deck state
           deckId = parseInt(postBody.api_deck_id) - 1
@@ -162,9 +184,11 @@ module.exports =
         else
           flag = false
       return unless flag
-      {_decks} = window
-      data.decksAddition.state = _decks.map @DI.getDeckState()
-      data.decks = _decks
+      data.decks = window._decks
+      state = []
+      for i, deck of data.decks
+        state[i] = @DI.getDeckState(deck, data.decksAddition)
+      data.decksAddition.state = state
       @setState
         dataVersion: @state.dataVersion + 1
         data: data
@@ -174,7 +198,7 @@ module.exports =
       window.removeEventListener 'game.response', @handleResponse
     shouldComponentUpdate: (nextProps, nextState)->
       # if ship-pane is visibile and dataVersion is changed, this pane should update!
-      if nextProps.selectedKey is @props.index and nextState.dataVersion isnt @showDataVersion  and !_.isEqual(@state, nextState) and !_.isEqual(@props, nextProps)
+      if nextState.dataVersion isnt @showDataVersion  and (!_.isEqual(@state, nextState) or !_.isEqual(@props, nextProps))
         @showDataVersion = nextState.dataVersion
         return true
       false
@@ -184,6 +208,14 @@ module.exports =
     #     @render = ThemeRenderer || LayoutPortrait
     #   else
     #     @render = ThemeRenderer || LayoutLandscape
+    # # Omni Renderer Mode
+    # componentWillUpdate: ->
+    #   if mode == 'combine'
+    #     @render = ThemeRenderer || CombinedShip
+    #   else if mode == 'battle'
+    #     @render = ThemeRenderer || BattleShip
+    #   else if mode == 'normal'
+    #     @render = ThemeRenderer || MightyShip
     render: ->
       <Panel bsStyle="default" >
         <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'omniship.css')} />
@@ -192,7 +224,7 @@ module.exports =
         {
           for i in [0..3]
             <Button key={i} bsSize="small"
-                            bsStyle={getStyle @state.data.decksAddition.state[i]}
+                            style={background: "#{getStyle @state.data.decksAddition.state[i]}"}
                             onClick={@handleClick.bind(this, i)}
                             className={if @state.activeDeck == i then 'active' else ''}>
               {@state.data.decksAddition.names[i]}
@@ -205,6 +237,7 @@ module.exports =
             <div className="ship-deck" className={if @state.activeDeck is i then 'show' else 'hidden'} key={i}>
               <PaneBody
                 key={i}
+                deckIndex={i}
                 activeDeck={@state.activeDeck}
                 data={@state.data}
               />

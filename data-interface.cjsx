@@ -163,7 +163,7 @@ class DataInterface
     remains = deck.api_ship.map (id) ->
       complete = that.getShipCondComplete(id, condStamps)
       if complete > 0
-        complete - condStamps[id]
+        complete - condStamps[id].start
       else
         0
     longest = remains.reduce (a, b) -> Math.max(a, b)
@@ -226,10 +226,10 @@ class DataInterface
   # 6: In mission                                  --- grey
   # 7: In map                                      --- primary / high contrast
   # [T]
-  getDeckState: (deck, deckData) ->
+  getDeckState: (deck, decksAddition) ->
     state = 0
     {$ships, _ships} = window
-    if deckData.inBattle[deck.api_id - 1]
+    if decksAddition.inBattle[deck.api_id - 1]
       return state = Math.max(state, 7)
     if deck.api_mission[0] > 0
       return state = Math.max(state, 6)
@@ -268,21 +268,30 @@ class DataInterface
     for shipId, ship of _ships
       if ship.api_cond < 49
         if condStamps[ship.api_id]?
-          # calibrate
-          ## move to same cond section
-          #
-          t = Date.now()
-          while Math.abs(t - condStamps[ship.api_id]) > 3 * 60 * 1000
-            t -= 3 * 60 * 1000
-          if t > condStamps[ship.api_id]
-            condStamps[ship.api_id] = t
           # clean
-          complete = Math.ceil((49 - ship.api_cond) / 3) * (3 * 60 * 1000) + condStamps[ship.api_id]
+          complete = Math.ceil((49 - ship.api_cond) / 3) * (3 * 60 * 1000) + condStamps[ship.api_id].start
           if complete > Date.now()
             delete condStamps[ship.api_id]
+            continue
+          # calibrate
+          ## move to same cond section
+          if ship.api_cond > condStamps[ship.api_id].cond
+            t = Date.now()
+            c = ship.api_cond
+            while c > condStamps[ship.api_id].cond
+              t -= 60 * 1000
+              c -= 1
+            if t < condStamps[ship.api_id].start
+              condStamps[ship.api_id].cond = ship.api_cond
+              condStamps[ship.api_id].state = t
+          else if ship.api_cond < condStamps[ship.api_cond].cond
+            condStamps[ship.api_id].cond = ship.api_cond
+            condStamps[ship.api_id].state = Date.now()
         else
           # new start
-          condStamps[ship.api_id] = Date.now()
+          condStamps[ship.api_id] = {}
+          condStamps[ship.api_id].start = Date.now()
+          condStamps[ship.api_id].cond = ship.api_cond
       else
         # stop
         delete condStamps[ship.api_id]
@@ -297,7 +306,7 @@ class DataInterface
     if shipId == -1 or ship.api_cond >= 49
       return complete
     if stamp?
-      complete = Math.ceil((49 - ship.api_cond) / 3) * (3 * 60 * 1000) + stamp
+      complete = Math.ceil((49 - ship.api_cond) / 3) * (3 * 60 * 1000) + stamp.start
     else
       console.log 'requesting unexist timestamp'
     complete
@@ -305,14 +314,14 @@ class DataInterface
 module.exports = DataInterface
 
 ### test code
-deck = _decks[0];
 path = require('path-extra');
 data = {};
-data.decks = {}; data.ships = {}; data.combined = {};
+data.decks = _decks;
+data.decksAddition = {}; data.ships = {}; data.combined = {};
 data.ships.condStamps = {};
 omni = require(path.join(ROOT, 'plugins', 'compactview', 'parts', 'omniship'));
 data.ships.condStamps = omni.DI.getShipCondStamps(data.ships.condStamps);
-data.decks.inBattle = [false, false, false, false]
+data.decksAddition.inBattle = [false, false, false, false]
 shipId = 4004;
 omni.DI.getShipCondComplete(shipId, data.ships.condStamps);
 resolveTime((omni.DI.getShipCondComplete(shipId, data.ships.condStamps) - Date.now()) / 1000);

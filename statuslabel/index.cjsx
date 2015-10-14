@@ -25,7 +25,7 @@ getShipStatus = (shipId) ->
     return status = 5
   return status
 
-StatusLabelMini = React.createClass
+StatusLabel = React.createClass
   shouldComponentUpdate: (nextProps, nextState) ->
     not _.isEqual(nextProps.label, @props.label)
   render: ->
@@ -47,5 +47,5 @@ StatusLabelMini = React.createClass
           <Label bsStyle="default" style={opacity: 0}></Label>
 
 module.exports =
-  reactClass: StatusLabelMini
+  reactClass: StatusLabel
   getShipStatus: getShipStatus
