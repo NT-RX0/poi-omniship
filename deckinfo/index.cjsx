@@ -6,27 +6,13 @@
 
 DeckInfo = React.createClass
   render: ->
-    <link rel="stylesheet" href={"deckinfo.css"} />
-    <div className="deck-info" style={display: "flex"}>
-    {
-      i = @props.deckIndex
-      decksAddition = @props.decksAddition
-      totalLv = decksAddition.lv[i].totalLv
-      avgLv = decksAddition.lv[i].avgLv
-      tyku = decksAddition.tyku[i]
-      saku25 = decksAddition.saku25[i]
-      saku25a = decksAddition.saku25a[i]
-      speed = decksAddition.speed[i]
-      cost = decksAddition.cost[i]
-      if i? and decksAddition? and totallv? and avgLv? and tyku? and saku25? and saku25a? and speed? and cost?
-        <span className="total-lv">Lv＋{totalLv?}</span>
-        <span className="tyku">{__ 'Fighter Power'}: {tyku?}</span>
-        <span className="saku">{__ 'LOS'}: {saku25a?}</span>
-        <span className="speed">速度：{speed?}</span>
-        <span className="cost">消耗：{cost?}</span>
-      else
-        <span>No Data</span>
-    }
+    <link rel="stylesheet" href={join(relative(ROOT, __dirname), "deckinfo.css")} />
+    <div className="deck-info flex-column" >
+      <span className="total-lv flex-row">Lv+: {@props.decksAddition.lv[@props.deckIndex].totalLv}</span>
+      <span className="tyku flex-row">{__ 'Fighter Power'}: {@props.decksAddition.tyku[@props.deckIndex].total}</span>
+      <span className="saku flex-row">{__ 'LOS'}: {@props.decksAddition.saku25a[@props.deckIndex].total}</span>
+      <span className="speed flex-row">速度: {@props.decksAddition.speed[@props.deckIndex]}</span>
+      <span className="cost flex-row">消耗: 油{@props.decksAddition.cost[@props.deckIndex].fuel} 弹{@props.decksAddition.cost[@props.deckIndex].bullet}</span>
     </div>
 
 module.exports = DeckInfo

@@ -1,10 +1,29 @@
 .deck-info {
   overflow: hidden;
+  justify-content: flex-start;
+  align-items: left;
 }
-.deck-info span{
+.deck-info > span{
   margin-left: 5px;
   flex: none;
 }
-.deck-info span:last-child {
+.deck-info > span:last-child {
   margin: 0;
+}
+/* for flex layout */
+.deck-info .flex-row
+{
+    display: flex;
+
+    flex-flow: row nowrap;
+}
+.deck-info .flex-column
+{
+    display: flex;
+
+    flex-flow: column nowrap;
+}
+.deck-info .flex-wrap
+{
+    flex-wrap: wrap;
 }
