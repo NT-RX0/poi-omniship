@@ -16,7 +16,7 @@ Slotitems = React.createClass
       <link rel="stylesheet" href={join(relative(ROOT, __dirname), "flex.css")} />
     {
       {$slotitems, _slotitems} = window
-      <OverlayTrigger placement='left' overlay={
+      <OverlayTrigger placement='top' overlay={
         <Tooltip className="flex-column">
         {
           for itemId, i in @props.data
