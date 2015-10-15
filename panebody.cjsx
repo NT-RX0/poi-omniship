@@ -54,18 +54,17 @@ PaneBody = React.createClass
     nextProps.activeDeck is @props.deckIndex # and !_.isEqual(nextProps, @props)
   render: ->
     <div>
-      <OverlayTrigger placement={if (!window.doubleTabbed) && (window.layout == 'vertical') then 'left' else 'right'} overlay={
+      <OverlayTrigger placement={if (!window.doubleTabbed) && (window.layout == 'vertical') then 'left' else 'top'} overlay={
           <Tooltip>
             <div>
-
+              <DeckInfo decksAddition={@props.data.decksAddition}
+                        deckIndex={@props.deckIndex}/>
             </div>
           </Tooltip>
         }>
         <div className="ship-header flex-row">
           <FontAwesome key={0} name='clock-o' />
           {@props.data.decksAddition.fullnames[@props.deckIndex]}
-          <DeckInfo decksAddition={@props.data.decksAddition}
-                    deckIndex={@props.deckIndex}/>
         </div>
       </OverlayTrigger>
       <div className="ship-details">

@@ -135,12 +135,12 @@ class DataInterface
   getDeckSpeed: (deck) ->
     {$ships, $slotitems, _ships} = window
     # hi / low and more
-    speed = 'hi'
+    speed = 'HI'
     for shipId in deck.api_ship
       continue if shipId == -1
       ship = _ships[shipId]
       if ship?.api_soku < 10
-        speed = 'low'
+        speed = 'LOW'
         break
     speed
 

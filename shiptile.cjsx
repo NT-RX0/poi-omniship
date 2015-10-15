@@ -70,7 +70,7 @@ ShipTile = React.createClass
       <div className="status-label">
         <StatusLabel label={label}/>
       </div>
-      <div className="ship-item flex-row" style={getStatusStyle label}>
+      <div className="ship-item flex-column" style={getStatusStyle label}>
         <div className="ship-info" >
           <span className="ship-lv">
             Lv.{ship.api_lv}
