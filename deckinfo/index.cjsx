@@ -6,7 +6,7 @@
 
 DeckInfo = React.createClass
   render: ->
-    <link rel="stylesheet" href={join(relative(ROOT, __dirname), "deckinfo.css")} />
+    <link rel="stylesheet" href={"deckinfo.css"} />
     <div className="deck-info" style={display: "flex"}>
     {
       i = @props.deckIndex
@@ -18,11 +18,14 @@ DeckInfo = React.createClass
       saku25a = decksAddition.saku25a[i]
       speed = decksAddition.speed[i]
       cost = decksAddition.cost[i]
-      <span className="total-lv">Lv＋{totalLv?}</span>
-      <span className="tyku">{__ 'Fighter Power'}: {tyku?}</span>
-      <span className="saku">{__ 'LOS'}: {saku25a?}</span>
-      <span className="speed">速度：{speed?}</span>
-      <span className="cost">消耗：{cost?}</span>
+      if i? and decksAddition? and totallv? and avgLv? and tyku? and saku25? and saku25a? and speed? and cost?
+        <span className="total-lv">Lv＋{totalLv?}</span>
+        <span className="tyku">{__ 'Fighter Power'}: {tyku?}</span>
+        <span className="saku">{__ 'LOS'}: {saku25a?}</span>
+        <span className="speed">速度：{speed?}</span>
+        <span className="cost">消耗：{cost?}</span>
+      else
+        <span>No Data</span>
     }
     </div>
 
