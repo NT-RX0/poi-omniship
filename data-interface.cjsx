@@ -158,6 +158,7 @@ class DataInterface
     bullet: bullet
 
   # [ ] 50%
+  # TODO: check empty stamps
   getDeckCondRemain: (deck, condStamps) ->
     that = this
     remains = deck.api_ship.map (id) ->
@@ -211,9 +212,10 @@ class DataInterface
         if _slotitems[itemId].api_slotitem_id is repairItem
           akashiCapacity += 1
       for i in [1 .. akashiCapacity]
-        ship = _ships[deck.api_ship[i]]
-        if ship.api_nowhp < ship.api_maxhp and ship.api_id not in _ndocks
-          return true
+        if deck.api_ship[i] > 0
+          ship = _ships[deck.api_ship[i]]
+          if ship.api_nowhp < ship.api_maxhp and ship.api_id not in _ndocks
+            return true
     return false
 
   # priority: ready | not suggested | can't sortie
@@ -284,7 +286,7 @@ class DataInterface
             if t < condStamps[ship.api_id].start
               condStamps[ship.api_id].cond = ship.api_cond
               condStamps[ship.api_id].state = t
-          else if ship.api_cond < condStamps[ship.api_cond].cond
+          else if ship.api_cond < condStamps[ship.api_id].cond
             condStamps[ship.api_id].cond = ship.api_cond
             condStamps[ship.api_id].state = Date.now()
         else

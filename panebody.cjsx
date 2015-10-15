@@ -5,6 +5,7 @@
 {__, __n} = require 'i18n'
 
 ShipTile = require './shiptile'
+DeckInfo = require './deckinfo'
 
 repairTimer =
   remain: 0
@@ -27,6 +28,12 @@ PaneBody = React.createClass
       # akashiTimeStamp: 0
       # ndocks: {}
       # condRemain: [0, 0, 0, 0]
+      # lv: []
+      # tyku: []
+      # saku25a: []
+      # saku25: []
+      # speed: []
+      # cost: []
     ships: {}
     shipsAddition: {}
       # condTimeStamps: {}
@@ -48,7 +55,18 @@ PaneBody = React.createClass
   render: ->
     <div>
       <div style={display:"flex", justifyContent:"space-between", margin:"5px 0"}>
+        <OverlayTrigger placement={if (!window.doubleTabbed) && (window.layout == 'vertical') then 'left' else 'right'} overlay={
+          <Tooltip>
+            <div>
+              <DeckInfo
+                decksAddition={@props.data.decksAddition}
+                deckIndex={@props.deckIndex}
+              />
+            </div>
+          </Tooltip>
+        }>
           <span className="ship-more" style={flex:"none"}><FontAwesome key={0} name='clock-o' />{@props.data.decksAddition.fullnames[@props.deckIndex]}</span>
+        </OverlayTrigger>
       </div>
       <div className="ship-details">
       {
@@ -65,6 +83,7 @@ PaneBody = React.createClass
               ship={ship}
               shipInfo={shipInfo}
               shipType={shipType}
+              goback={@props.data.combined.goback}
               />
           ]
       }

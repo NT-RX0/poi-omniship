@@ -2,11 +2,11 @@
 {$ships, $shipTypes, _ships} = window
 {Label} = ReactBootstrap
 
-getShipStatus = (shipId) ->
+getShipStatus = (shipId, goback) ->
   {_ships, _ndocks} = window
   status = -1
   # retreat status
-  if escapeId? and shipId in @props.escapeId
+  if escapeId? and shipId in goback
     return status = 0
   # reparing
   if shipId in _ndocks

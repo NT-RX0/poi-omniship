@@ -61,7 +61,7 @@ ShipTile = React.createClass
     # refresh label
     {label} = @state
     {_ships, _decks} = window
-    label = getShipStatus @props.ship.api_ship_id
+    label = getShipStatus @props.ship.api_ship_id, @props.goback
     setState: {label: label}
   render: ->
     {ship, shipInfo, shipType} = @props
@@ -70,24 +70,19 @@ ShipTile = React.createClass
       <div className="status-label">
         <StatusLabel label={label}/>
       </div>
-      <div className="ship-item" style={getStatusStyle label}>
-        <OverlayTrigger placement="top" overlay={
-          <Tooltip>
-            <Slotitems className="ship-slot" data={ship.api_slot.concat(ship.api_slot_ex || -1)} onslot={ship.api_onslot} maxeq={ship.api_maxeq} layout="mini"/>
-          </Tooltip>
-        }>
-          <div className="ship-info" >
-            <span className="ship-lv">
-              Lv. {ship.api_lv}
-            </span>
-            <span className="ship-name">
-              {shipInfo.api_name}
-            </span>
-            <span className="ship-cond" style={color:getCondStyle ship.api_cond}>
-              ★{ship.api_cond}
-            </span>
-          </div>
-        </OverlayTrigger>
+      <div className="ship-item flex-row" style={getStatusStyle label}>
+        <div className="ship-info" >
+          <span className="ship-lv">
+            Lv.{ship.api_lv}
+          </span>
+          <span className="ship-name">
+            {shipInfo.api_name}
+          </span>
+          <span className="ship-cond" style={color:getCondStyle ship.api_cond}>
+            ★{ship.api_cond}
+          </span>
+          <Slotitems className="ship-slot" data={ship.api_slot.concat(ship.api_slot_ex || -1)} onslot={ship.api_onslot} maxeq={ship.api_maxeq}/>
+        </div>
         <div className="flex-row" style={width:"100%", marginTop:5}>
           <span className="ship-hp">
             <span className="ship-hp-text" style={flex: "none", display: "flex"}>

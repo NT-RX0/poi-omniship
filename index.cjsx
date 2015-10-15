@@ -35,7 +35,7 @@ getStyle = (state) ->
     # 5: Repairing                                --- blue
     # 6: In mission                               --- grey
     # 7: In map                                   --- primary / high contrast
-    return ['#8BC34A', '#90CAF9', '#FBC02D', '#EF6C00', '#E53935', '#2196F3', '#26A69A', '#2E7D32'][state]
+    return ['#8BC34A', '#64B5F6', '#FBC02D', '#EF6C00', '#E53935', '#2196F3', '#009688', '#2E7D32'][state]
   'default'
 
 module.exports =
@@ -68,6 +68,12 @@ module.exports =
           akashiTimeStamp: 0
           ndocks: {}
           condRemain: [0, 0, 0, 0]
+          lv: []
+          tyku: []
+          saku25a: []
+          saku25: []
+          speed: []
+          cost: []
         ships: {}
         shipsAddition:
           condTimeStamps: {}
@@ -80,6 +86,23 @@ module.exports =
         @setState
           activeDeck: idx
           dataVersion: @state.dataVersion + 1
+    updateDecksInfo: () ->
+      data = @state.data
+      lv = tyku = saku25a = saku25 = speed = cost = []
+      for deck, i in data.decks
+        lv[i] = @DI.getDeckLvInfo(deck)
+        tyku[i] = @DI.getDeckTyku(deck)
+        saku25[i] = @DI.getDeckSaku25(deck)
+        saku25a[i] = @DI.getDeckSaku25a(deck)
+        speed[i] = @DI.getDeckSpeed(deck)
+        cost[i] = @DI.getDeckCost(deck)
+      data.decksAddition.lv = lv
+      data.decksAddition.tyku = tyku
+      data.decksAddition.saku25a = saku25a
+      data.decksAddition.saku25 = saku25
+      data.decksAddition.speed = speed
+      data.decksAddition.cost = cost
+      @setState {data: data}
     handleResponse: (e) ->
       {method, path, body, postBody} = e.detail
       {data} = @state
@@ -105,8 +128,12 @@ module.exports =
             data.decksAddition.akashiTimeStamp = 0
           # save ndocks
           data.decksAddition.ndocks = body.api_ndock
+          # update decks info
+          @updateDecksInfo()
           # reset inbattle
           data.decksAddition.inBattle = [false, false, false, false]
+          # reset goback
+          data.combined.goback = []
         when '/kcsapi/api_req_hensei/change'
           decks = @state.data.decks
           # update akashi
@@ -120,7 +147,9 @@ module.exports =
           for deck, i in decks
             deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
           data.decksAddition.condRemain = deckCondRemain
-        when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_get_member/ship3', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
+          # update decks info
+          @updateDecksInfo()
+        when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
           decks = @state.data.decks
           # update cond
           data.shipsAddition.condTimeStamps = @DI.getShipCondStamps(data.shipsAddition.condTimeStamps)
@@ -128,6 +157,16 @@ module.exports =
           for deck, i in decks
             deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
           data.decksAddition.condRemain = deckCondRemain
+        when '/kcsapi/api_get_member/ship3'
+          decks = @state.data.decks
+          # update cond
+          data.shipsAddition.condTimeStamps = @DI.getShipCondStamps(data.shipsAddition.condTimeStamps)
+          deckCondRemain = []
+          for deck, i in decks
+            deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
+          data.decksAddition.condRemain = deckCondRemain
+          # change equipment
+          @updateDecksInfo()
         when '/kcsapi/api_req_kousyou/destroyship'
           # update cond
           shipId = parseInt postBody.api_ship_id
