@@ -88,7 +88,12 @@ module.exports =
           dataVersion: @state.dataVersion + 1
     updateDecksInfo: () ->
       data = @state.data
-      lv = tyku = saku25a = saku25 = speed = cost = []
+      lv = []
+      tyku = []
+      saku25a = []
+      saku25 = []
+      speed = []
+      cost = []
       for deck, i in data.decks
         lv[i] = @DI.getDeckLvInfo(deck)
         tyku[i] = @DI.getDeckTyku(deck)
@@ -128,8 +133,6 @@ module.exports =
             data.decksAddition.akashiTimeStamp = 0
           # save ndocks
           data.decksAddition.ndocks = body.api_ndock
-          # update decks info
-          @updateDecksInfo()
           # reset inbattle
           data.decksAddition.inBattle = [false, false, false, false]
           # reset goback
@@ -147,8 +150,6 @@ module.exports =
           for deck, i in decks
             deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
           data.decksAddition.condRemain = deckCondRemain
-          # update decks info
-          @updateDecksInfo()
         when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
           decks = @state.data.decks
           # update cond
@@ -165,8 +166,6 @@ module.exports =
           for deck, i in decks
             deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
           data.decksAddition.condRemain = deckCondRemain
-          # change equipment
-          @updateDecksInfo()
         when '/kcsapi/api_req_kousyou/destroyship'
           # update cond
           shipId = parseInt postBody.api_ship_id
@@ -224,6 +223,8 @@ module.exports =
           flag = false
       return unless flag
       data.decks = window._decks
+      # update decks info
+      @updateDecksInfo()
       state = []
       for i, deck of data.decks
         state[i] = @DI.getDeckState(deck, data.decksAddition)
