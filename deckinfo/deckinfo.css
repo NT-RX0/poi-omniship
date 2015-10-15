@@ -1,0 +1,10 @@
+.deck-info {
+  overflow: hidden;
+}
+.deck-info span{
+  margin-left: 5px;
+  flex: none;
+}
+.deck-info span:last-child {
+  margin: 0;
+}
