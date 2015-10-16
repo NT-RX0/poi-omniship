@@ -9,7 +9,6 @@
 {getShipStatus, reactClass} = require './statuslabel'
 StatusLabel = reactClass
 CondBar = require './condbar'
-RecoveryBar = require './recovery-bar'
 Slotitems = require './slotitems'
 
 getHpStyle = (percent) ->

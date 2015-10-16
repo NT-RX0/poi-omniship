@@ -6,16 +6,7 @@
 
 ShipTile = require './shiptile'
 DeckInfo = require './deckinfo'
-
-repairTimer =
-  remain: 0
-  total: 0
-missionTimer =
-  remain: 0
-  total: 0
-condTimer =
-  remain: 0
-  total: 0
+RecoveryBar = require './recoverybar'
 
 PaneBody = React.createClass
   data:
@@ -64,6 +55,8 @@ PaneBody = React.createClass
         }>
         <div className="ship-header flex-row">
           <FontAwesome key={0} name='clock-o' />
+          <RecoveryBar deckIndex={@props.deckIndex}
+                       decksAddition={@props.data.decksAddition} />
           {@props.data.decksAddition.fullnames[@props.deckIndex]}
         </div>
       </OverlayTrigger>

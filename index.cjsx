@@ -10,15 +10,18 @@ PaneBody = require './panebody'
 
 # customized renderers
 {LayoutPortrait, LayoutLandscape} = require './renderers'
-# ThemeRenderer = window.ThemeRenderer['#{@name}']
+ThemeRenderer = window.ThemeRenderer?['#{@name}']
 
 # TODO
 # [x] 1. prepare data
 #    [X] deck cond
 #    [x] test code
+#    [ ] akashi repair
 # [X] 2. transform renderer
-# [ ] 3. rework layout
-# [ ] 4. add combined fleet, detailed fleet, battle fleet
+# [\] 3. rework layout
+# [X] 4. add theme support
+# [\] 5. add combined fleet, detailed fleet, battle fleet
+# [ ] 6. add fleet title to data
 
 escapeId = -1
 towId = -1
@@ -36,7 +39,7 @@ getStyle = (state) ->
     # 6: In mission                               --- grey
     # 7: In map                                   --- primary / high contrast
     return ['#8BC34A', '#64B5F6', '#FBC02D', '#EF6C00', '#E53935', '#2196F3', '#009688', '#2E7D32'][state]
-  'default'
+  ''
 
 module.exports =
   name: 'omniship'
@@ -49,6 +52,7 @@ module.exports =
       activeDeck: 0
       dataVersion: 0
       showDataVersion: 0
+      mode: 'detail'  # 'combined' / 'battle' / 'detail'
       data:
         decks: []
         decksAddition:
@@ -86,6 +90,8 @@ module.exports =
         @setState
           activeDeck: idx
           dataVersion: @state.dataVersion + 1
+    changeMode: (mode) ->
+      @setState {mode: mode}
     updateDecksInfo: () ->
       data = @state.data
       lv = []
@@ -249,39 +255,42 @@ module.exports =
     #     @render = ThemeRenderer || LayoutPortrait
     #   else
     #     @render = ThemeRenderer || LayoutLandscape
-    # # Omni Renderer Mode
-    # componentWillUpdate: ->
-    #   if mode == 'combine'
-    #     @render = ThemeRenderer || CombinedShip
-    #   else if mode == 'battle'
-    #     @render = ThemeRenderer || BattleShip
-    #   else if mode == 'normal'
-    #     @render = ThemeRenderer || MightyShip
     render: ->
+      {mode} = @state
       <Panel bsStyle="default" >
         <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'omniship.css')} />
         <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'flex.css')} />
-        <ButtonGroup>
-        {
-          for i in [0..3]
-            <Button key={i} bsSize="small"
-                            style={background: "#{getStyle @state.data.decksAddition.state[i]}"}
-                            onClick={@handleClick.bind(this, i)}
-                            className={if @state.activeDeck == i then 'active' else ''}>
-              {@state.data.decksAddition.names[i]}
-            </Button>
-        }
-        </ButtonGroup>
-        {
-          decks = @state.data.decks
-          for deck, i in decks
-            <div className="ship-deck" className={if @state.activeDeck is i then 'show' else 'hidden'} key={i}>
-              <PaneBody
-                key={i}
-                deckIndex={i}
-                activeDeck={@state.activeDeck}
-                data={@state.data}
-              />
-            </div>
-        }
+        <div className="toolbar flex-row">
+          <ButtonGroup>
+          {
+            for i in [0..3]
+              <Button key={i} bsSize="small"
+                              style={background: "#{getStyle @state.data.decksAddition.state[i]}"}
+                              onClick={@handleClick.bind(this, i)}
+                              className={if @state.activeDeck == i then 'active' else ''}>
+                {@state.data.decksAddition.names[i]}
+              </Button>
+          }
+          </ButtonGroup>
+          <Button key={0} bsSize="small" onclick={@changeMode.bind(this, 'detail')} className="detail"><FontAwesome key={0} name="reorder"/></Button>
+          <Button key={1} bsSize="small" onclick={@changeMode.bind(this, 'battle')} className="battle"><FontAwesome key={0} name="asterisk"/></Button>
+          <Button key={2} bsSize="small" onclick={@changeMode.bind(this, 'combined')} className="combined">★</Button>
+        </div>
+          {
+            if mode == 'combined'
+              <div></div>
+            else if mode == 'battle'
+              <div></div>
+            else if mode == 'detail'
+              decks = @state.data.decks
+              for deck, i in decks
+                <div className="ship-deck" className={if @state.activeDeck is i then 'show' else 'hidden'} key={i}>
+                  <PaneBody
+                    key={i}
+                    deckIndex={i}
+                    activeDeck={@state.activeDeck}
+                    data={@state.data}
+                  />
+                </div>
+          }
       </Panel>
