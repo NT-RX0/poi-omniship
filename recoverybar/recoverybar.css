@@ -1,33 +1,38 @@
-.rec-progress {
+.recovery-bar {
+  align-items: center;
+  flex: 1;
+}
+
+.recovery-bar .rec-progress {
     display: block;
     margin: 5px;
-    flex: 1;
 }
 
-.rec-progress .progress-bar {
+.recovery-bar .rec-progress .progress-bar {
     margin: 0;
+    height: 5px;
 }
 
-.rec-progress .progress-bar:last-child:before {
+.recovery-bar .rec-progress .progress-bar:last-child:before {
     background-color: rgba(0, 0, 0, .2);
 }
 
-.rec-progress .ready.progress-bar {
-  background-color:; #7FC135;
+.recovery-bar .rec-progress .ready.progress-bar {
+  background-color: #7FC135;
 }
 
-.rec-progress .cond.progress-bar {
-  background-color:; #F4CD28;
+.recovery-bar .rec-progress .cond.progress-bar {
+  background-color: #F4CD28;
 }
 
-.rec-progress .repair.progress-bar {
-  background-color:; #28BDF4;
+.recovery-bar .rec-progress .repair.progress-bar {
+  background-color: #28BDF4;
 }
 
-.rec-progress .mission.progress-bar {
-  background-color:; #009688;
+.recovery-bar .rec-progress .mission.progress-bar {
+  background-color: #009688;
 }
 
-.rec-progress .akashi.progress-bar {
-  background-color:; #64B5F6;
+.recovery-bar .rec-progress .akashi.progress-bar {
+  background-color: #64B5F6;
 }

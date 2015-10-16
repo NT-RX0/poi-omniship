@@ -1,3 +1,4 @@
+{relative, join} = require 'path-extra'
 {_, $, $$, React, ReactBootstrap, ROOT, toggleModal} = window
 {$ships, $shipTypes, _ships, resolveTime} = window
 {ProgressBar} = ReactBootstrap
@@ -8,6 +9,7 @@
 @props.akashiRemain
 @props.getDeckMissionRemain
 ###
+
 RecoveryBar = React.createClass
   componentWillUnmount: ->
     @interval = clearInterval @interval
@@ -20,10 +22,10 @@ RecoveryBar = React.createClass
     # else
     #   $(".rec-progress-#{@props.deckIndex}.progress-bar").style.backgroundColor = "#7FC135"
   render: ->
-    <div>
+    <div className="recovery-bar">
       <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'recoverybar.css')} />
       {
-        switch @props.decksAddition.state[@props.deckIndex]
+        switch @props.decksAddition?.state?[@props.deckIndex]
           when 0
             <ProgressBar key={1} className="rec-progress rec-progress-#{@props.deckIndex} ready" now={100} />
           when 1
