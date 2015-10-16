@@ -1,0 +1,33 @@
+.rec-progress {
+    display: block;
+    margin: 5px;
+    flex: 1;
+}
+
+.rec-progress .progress-bar {
+    margin: 0;
+}
+
+.rec-progress .progress-bar:last-child:before {
+    background-color: rgba(0, 0, 0, .2);
+}
+
+.rec-progress .ready.progress-bar {
+  background-color:; #7FC135;
+}
+
+.rec-progress .cond.progress-bar {
+  background-color:; #F4CD28;
+}
+
+.rec-progress .repair.progress-bar {
+  background-color:; #28BDF4;
+}
+
+.rec-progress .mission.progress-bar {
+  background-color:; #009688;
+}
+
+.rec-progress .akashi.progress-bar {
+  background-color:; #64B5F6;
+}
