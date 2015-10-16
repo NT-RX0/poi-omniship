@@ -63,6 +63,8 @@ ShipTile = React.createClass
     {_ships, _decks} = window
     label = getShipStatus @props.ship.api_ship_id, @props.goback
     setState: {label: label}
+  shouldComponentUpdate: (nextProps, nextState) ->
+    !_.isEqual(nextProps.ship, @props.ship)
   render: ->
     {ship, shipInfo, shipType} = @props
     {label} = @state
@@ -78,16 +80,21 @@ ShipTile = React.createClass
           <span className="ship-name">
             {shipInfo.api_name}
           </span>
+          <span className="ship-hp-text" style={flex: "none", display: "flex"}>
+            {ship.api_nowhp} / {ship.api_maxhp}
+          </span>
           <span className="ship-cond" style={color:getCondStyle ship.api_cond}>
             ★{ship.api_cond}
           </span>
           <Slotitems className="ship-slot" data={ship.api_slot.concat(ship.api_slot_ex || -1)} onslot={ship.api_onslot} maxeq={ship.api_maxeq}/>
         </div>
         <div className="flex-row" style={width:"100%", marginTop:5}>
+          <OverlayTrigger placement='top' overlay={<Tooltip><FontAwesome name="arrow-up"/> {ship.api_exp[1]}</Tooltip>}>
+            <div className="exp-progress">
+              <ProgressBar bsStyle="info" now={ship.api_exp[2]} />
+            </div>
+          </OverlayTrigger>
           <span className="ship-hp">
-            <span className="ship-hp-text" style={flex: "none", display: "flex"}>
-              {ship.api_nowhp} / {ship.api_maxhp}
-            </span>
             <OverlayTrigger show = {ship.api_ndock_time} placement='bottom' overlay={<Tooltip>入渠时间：{resolveTime ship.api_ndock_time / 1000}</Tooltip>}>
               <ProgressBar style={flex: "auto"} bsStyle={getHpStyle ship.api_nowhp / ship.api_maxhp * 100} now={ship.api_nowhp / ship.api_maxhp * 100} />
             </OverlayTrigger>

@@ -6,16 +6,34 @@
     margin-right: 8px;
 }
 
+.omniship .toolbar > .btn {
+    padding: 0;
+    height: 24px;
+    width: 24px;
+    margin-right: 5px;
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.omniship .toolbar > .btn:last-child {
+    margin-right: 0;
+}
+
 .omniship .btn-group {
     display: flex;
     width: 100%;
     padding-right: 5px;
     padding-left: 5px;
+    margin-right: 5px;
+    flex: 1;
 }
 
 .omniship .btn-group .btn {
-    padding: 7px;
+    padding: 0;
     flex: 1;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
 }
 
 .omniship .hidden {
@@ -26,7 +44,7 @@
     display: block;
 }
 
-.omniship .deckStatus {
+.omniship .deck-status {
     padding-right: 0;
     padding-left: 0;
     text-align: center;
@@ -37,9 +55,12 @@
 }
 
 .omniship .ship-header {
+    align-items: center;
     justify-content: space-between;
-    margin: 8px 0 5px 0;
-    height: 12px;
+    margin: 8px 10px 5px;
+    height: 15px;
+    font-size: 12px;
+    line-height: 15px;
 }
 
 .omniship .ship-header .fa {
@@ -131,6 +152,13 @@
     flex: 0 1 auto;
 }
 
+.omniship .ship-item .ship-hp-text {
+    /*font-size: 60%;
+    line-height: 1;*/
+    margin-left: 5px;
+    flex: none;
+}
+
 .omniship .ship-details .ship-item .ship-cond {
     margin-left: 5px;
     flex: none;
@@ -172,15 +200,14 @@
 .omniship .ship-item .ship-hp {
     display: flex;
     flex-direction: row;
-    flex: 2;
+    flex: 3;
     /*margin: 0 4px;*/
 }
 
-.omniship .ship-item .ship-hp-text {
-    font-size: 60%;
-    line-height: 1;
-    margin-right: 4px;
-    flex: none;
+.omniship .ship-item .exp-progress {
+  flex: 1;
+  height: 5px;
+  margin-right: 5px;
 }
 
 .omniship .hp-progress {
