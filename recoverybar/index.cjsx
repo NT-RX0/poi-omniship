@@ -13,14 +13,7 @@
 RecoveryBar = React.createClass
   componentWillUnmount: ->
     @interval = clearInterval @interval
-  componentDidMount: ->
-    #   $(".rec-progress-#{@props.deckIndex}.progress-bar").style.backgroundColor = "#28BDF4"
-    # else if @props.missionTimer.remain? and@state.elapsed - @props.missionTimer.remain < 0
-    #   $(".rec-progress-#{@props.deckIndex}.progress-bar").style.backgroundColor = "#747474"
-    # else if @props.condTimer.remain? and @state.elapsed - @props.condTimer.remain < 0
-    #   $(".rec-progress-#{@props.deckIndex}.progress-bar").style.backgroundColor = "#F4CD28"
-    # else
-    #   $(".rec-progress-#{@props.deckIndex}.progress-bar").style.backgroundColor = "#7FC135"
+  # componentDidMount: ->
   render: ->
     <div className="recovery-bar">
       <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'recoverybar.css')} />
@@ -36,6 +29,10 @@ RecoveryBar = React.createClass
             <ProgressBar key={1} className="rec-progress rec-progress-#{@props.deckIndex} repair" now={100} />
           when 6
             <ProgressBar key={1} className="rec-progress rec-progress-#{@props.deckIndex} mission" now={100} />
+          when 7
+            <ProgressBar key={1} className="rec-progress rec-progress-#{@props.deckIndex} battle" striped now={100} />
+          else
+            <ProgressBar bsStyle='success' key={1} className="rec-progress rec-progress-#{@props.deckIndex}" now={100} />
       }
     </div>
 
