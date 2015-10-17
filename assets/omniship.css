@@ -116,8 +116,8 @@
     overflow: hidden;
     margin-left: 5px;
     white-space: nowrap;
-    text-overflow: ellipsis;
-    flex: 0 1 auto;
+    text-overflow: clip;
+    flex: 0 1 3em;
 }
 
 .omniship .ship-item .ship-hp-text {
@@ -125,11 +125,13 @@
     line-height: 1;*/
     margin-left: 5px;
     flex: none;
+    width: 4em;
 }
 
 .omniship .ship-details .ship-item .ship-cond {
     margin-left: 5px;
     flex: none;
+    width: 3em;
     align-self: flex-end;
     /*margin-right: 4px;*/
     /*margin-bottom: 5px;*/
@@ -172,7 +174,7 @@
 }
 
 .omniship .ship-item .exp-progress {
-  flex: 1;
+  flex: 0 1 6em;
   height: 5px;
   margin-right: 5px;
 }

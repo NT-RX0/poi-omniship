@@ -204,6 +204,8 @@ class DataInterface
     firstDeckId = deck.api_ship[0]
     firstDeck = $ships[_ships[firstDeckId].api_ship_id]
     akashi = firstDeck if firstDeck.api_stype is workShip
+    if !akashi?
+      return false
     myAkashi = _ships[firstDeckId]
     if (myAkashi.api_nowhp * 4 // myAkashi.api_maxhp) > 2
       akashiCapacity = 1
@@ -246,7 +248,7 @@ class DataInterface
       if (ship.api_nowhp / ship.api_maxhp) < 0.25
         state = Math.max(state, 4)
       # damaged
-      if (ship.api_nowhp / ship.api_maxhp) < 0.75
+      if (ship.api_nowhp / ship.api_maxhp) < 0.5
         state = Math.max(state, 3)
       # Not supplied
       if (ship.api_fuel / shipInfo.api_fuel_max) < 0.99 || (ship.api_bull / shipInfo.api_bull_max) < 0.99
