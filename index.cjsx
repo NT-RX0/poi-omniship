@@ -7,7 +7,7 @@
 
 DataInterface = require './data-interface'
 PaneBody = require './panebody'
-
+{getShipStatus} = require './statuslabel'
 # customized renderers
 {LayoutPortrait, LayoutLandscape} = require './renderers'
 ThemeRenderer = window.ThemeRenderer?['#{@name}']
@@ -68,6 +68,10 @@ module.exports =
           # 6: In mission                               --- grey
           # 7: In map                                   --- primary / high contrast
           state: [-1, -1, -1, -1]
+          label: [[-1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1]]
           inBattle: [false, false, false, false]
           akashiTimeStamp: 0
           ndocks: {}
@@ -114,6 +118,12 @@ module.exports =
       data.decksAddition.speed = speed
       data.decksAddition.cost = cost
       @setState {data: data}
+    updateLabels: () ->
+      {label, data} = @state
+      for deck, i in data.decks
+        for shipId, j in deck.api_ship
+          data.decksAddition.label[i][j] = getShipStatus shipId, data.combined.goback
+      @setState {data: data}
     handleResponse: (e) ->
       {method, path, body, postBody} = e.detail
       {data} = @state
@@ -139,6 +149,8 @@ module.exports =
             data.decksAddition.akashiTimeStamp = 0
           # save ndocks
           data.decksAddition.ndocks = body.api_ndock
+          # update labels
+          @updateLabels()
           # reset inbattle
           data.decksAddition.inBattle = [false, false, false, false]
           # reset goback
@@ -156,6 +168,8 @@ module.exports =
           for deck, i in decks
             deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
           data.decksAddition.condRemain = deckCondRemain
+          # update labels
+          @updateLabels()
         when '/kcsapi/api_req_hokyu/charge', '/kcsapi/api_get_member/deck', '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_get_member/ship2', '/kcsapi/api_req_kaisou/powerup', '/kcsapi/api_get_member/ndock', '/kcsapi/api_req_nyukyo/start', '/kcsapi/api_req_nyukyo/speedchange'
           decks = @state.data.decks
           # update cond
@@ -164,6 +178,8 @@ module.exports =
           for deck, i in decks
             deckCondRemain[i] = @DI.getDeckCondRemain(deck, data.shipsAddition.condTimeStamps)
           data.decksAddition.condRemain = deckCondRemain
+          # update labels
+          @updateLabels()
         when '/kcsapi/api_get_member/ship3'
           decks = @state.data.decks
           # update cond
@@ -193,6 +209,8 @@ module.exports =
             # console.log "退避：#{_ships[escapeId].api_name} 护卫：#{_ships[towId].api_name}"
             data.combined.goback.push escapeId
             data.combined.goback.push towId
+          # update labels
+          @updateLabels()
         when '/kcsapi/api_req_map/start', '/kcsapi/api_req_map/next'
           combined = data.combined.state > 0
           decks = @state.data.decks
@@ -242,13 +260,13 @@ module.exports =
       window.addEventListener 'game.response', @handleResponse
     componentWillUnmount: ->
       window.removeEventListener 'game.response', @handleResponse
-    shouldComponentUpdate: (nextProps, nextState)->
-      # if ship-pane is visibile and dataVersion is changed, this pane should update!
-      # TODO: add performance measurement
-      if nextState.dataVersion isnt @showDataVersion or !_.isEqual(@state, nextState) or !_.isEqual(@props, nextProps)
-        @showDataVersion = nextState.dataVersion
-        return true
-      false
+    # shouldComponentUpdate: (nextProps, nextState)->
+    #   # if ship-pane is visibile and dataVersion is changed, this pane should update!
+    #   # TODO: add performance measurement
+    #   if nextState.dataVersion isnt @showDataVersion or !_.isEqual(@state, nextState) or !_.isEqual(@props, nextProps)
+    #     @showDataVersion = nextState.dataVersion
+    #     return true
+    #   false
     # # Conditional Renderer Sample
     # componentWillMount: ->
     #   if layout == 'horizontal'
@@ -290,6 +308,7 @@ module.exports =
                     deckIndex={i}
                     activeDeck={@state.activeDeck}
                     data={@state.data}
+                    label={@state.data.decksAddition.label[i]}
                   />
                 </div>
           }

@@ -3,6 +3,7 @@
 {$ships, $shipTypes, _ships} = window
 {Button, ButtonGroup, OverlayTrigger, Tooltip, Overlay, Popover, ProgressBar} = ReactBootstrap
 {__, __n} = require 'i18n'
+Immutable = require 'immutable'
 
 ShipTile = require './shiptile'
 DeckInfo = require './deckinfo'
@@ -76,6 +77,7 @@ PaneBody = React.createClass
               shipInfo={shipInfo}
               shipType={shipType}
               goback={@props.data.combined.goback}
+              label={@props.label[j]}
               />
           ]
       }

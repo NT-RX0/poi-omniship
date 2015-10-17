@@ -6,7 +6,7 @@
 {__, __n} = require 'i18n'
 
 
-{getShipStatus, reactClass} = require './statuslabel'
+{reactClass} = require './statuslabel'
 StatusLabel = reactClass
 CondBar = require './condbar'
 Slotitems = require './slotitems'
@@ -54,28 +54,14 @@ getStatusStyle = (status) ->
     return {}
 
 ShipTile = React.createClass
-  getInitialState: ->
-    label: -1
-  updateLabels: ->
-    # refresh label
-    {label} = @state
-    {_ships, _decks} = window
-    label = getShipStatus @props.ship.api_ship_id, @props.goback
-    setState: {label: label}
-  shouldComponentUpdate: (nextProps, nextState) ->
-    !_.isEqual(nextProps.ship, @props.ship)
+  # shouldComponentUpdate: (nextProps, nextState) ->
+  #   !_.isEqual(nextProps.ship, @props.ship)
   render: ->
     {ship, shipInfo, shipType} = @props
-    {label} = @state
     <div className="ship-tile">
-      <div className="status-label">
-        <StatusLabel label={label}/>
-      </div>
-      <div className="ship-item flex-column" style={getStatusStyle label}>
+      <div className="ship-item flex-column" style={getStatusStyle @props.label}>
         <div className="ship-info" >
-          <span className="ship-lv">
-            Lv.{ship.api_lv}
-          </span>
+          <StatusLabel label={@props.label} shipLv={ship.api_lv}/>
           <span className="ship-name">
             {shipInfo.api_name}
           </span>
