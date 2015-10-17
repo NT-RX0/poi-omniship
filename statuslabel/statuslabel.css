@@ -1,0 +1,11 @@
+.status-label {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    flex: none;
+}
+
+.status-label .label {
+    padding: 4px 6px;
+    min-width: 3em;
+}
