@@ -4,6 +4,7 @@
 {Button, ButtonGroup} = ReactBootstrap
 {ProgressBar, OverlayTrigger, Tooltip, Alert, Overlay, Label, Panel, Popover} = ReactBootstrap
 {__, __n} = require 'i18n'
+PureRenderMixin = require 'react-addons-pure-render-mixin'
 
 
 {reactClass} = require './statuslabel'
@@ -54,8 +55,7 @@ getStatusStyle = (status) ->
     return {}
 
 ShipTile = React.createClass
-  # shouldComponentUpdate: (nextProps, nextState) ->
-  #   !_.isEqual(nextProps.ship, @props.ship)
+  mixins: [PureRenderMixin]
   render: ->
     {ship, shipInfo, shipType} = @props
     <div className="ship-tile">

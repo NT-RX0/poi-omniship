@@ -4,6 +4,8 @@
 {Button, ButtonGroup} = ReactBootstrap
 {ProgressBar, OverlayTrigger, Tooltip, Alert, Overlay, Label, Panel, Popover} = ReactBootstrap
 {__, __n} = require 'i18n'
+Immutable = require 'immutable'
+PureRenderMixin = require 'react-addons-pure-render-mixin'
 
 DataInterface = require './data-interface'
 PaneBody = require './panebody'
@@ -47,6 +49,7 @@ module.exports =
   displayName: <span><FontAwesome key={0} name='bars' /> 全能舰队</span>
   description: '舰队展示页面，展示所有舰队信息'
   reactClass: React.createClass
+    mixins: [PureRenderMixin]
     DI: new DataInterface()
     getInitialState: ->
       activeDeck: 0
@@ -82,6 +85,10 @@ module.exports =
           saku25: []
           speed: []
           cost: []
+          shipDetails: [[{}, {}, {}, {}, {}, {}],
+                        [{}, {}, {}, {}, {}, {}],
+                        [{}, {}, {}, {}, {}, {}],
+                        [{}, {}, {}, {}, {}, {}]]
         ships: {}
         shipsAddition:
           condTimeStamps: {}
@@ -130,6 +137,7 @@ module.exports =
       flag = true
       switch path
         # TODO: 给粮舰 & 双飞
+        # TODO: 启动api加载顺序，变量调用顺序
         when '/kcsapi/api_port/port'
           decks = @state.data.decks
           # update combined state
@@ -243,16 +251,22 @@ module.exports =
                   damagedShips.push("Lv. #{ship.api_lv} - #{ship.api_name}")
           if damagedShips.length > 0
             toggleModal __('Attention!'), damagedShips.join(' ') + __('is heavily damaged!')
-        else
-          flag = false
       return unless flag
       data.decks = window._decks
-      # update decks info
+      # update decks states
       @updateDecksInfo()
       state = []
       for i, deck of data.decks
         state[i] = @DI.getDeckState(deck, data.decksAddition)
       data.decksAddition.state = state
+      # update additional shipinfo
+      {$ships, $shipTypes, _ships} = window
+      for deck, i in data.decks
+        for shipId, j in deck.api_ship
+          continue if shipId == -1
+          data.decksAddition.shipDetails[i][j].ship = _ships[shipId]
+          data.decksAddition.shipDetails[i][j].shipInfo = $ships[ship.api_ship_id]
+          data.decksAddition.shipDetails[i][j].shipType = $shipTypes[shipInfo.api_stype].api_name
       @setState
         dataVersion: @state.dataVersion + 1
         data: data
@@ -260,13 +274,12 @@ module.exports =
       window.addEventListener 'game.response', @handleResponse
     componentWillUnmount: ->
       window.removeEventListener 'game.response', @handleResponse
-    # shouldComponentUpdate: (nextProps, nextState)->
-    #   # if ship-pane is visibile and dataVersion is changed, this pane should update!
-    #   # TODO: add performance measurement
-    #   if nextState.dataVersion isnt @showDataVersion or !_.isEqual(@state, nextState) or !_.isEqual(@props, nextProps)
-    #     @showDataVersion = nextState.dataVersion
-    #     return true
-    #   false
+    nowTime: 0
+    componentWillUpdate: (nextProps, nextState) ->
+      @nowTime = (new Date()).getTime()
+    componentDidUpdate: (prevProps, prevState) ->
+      cur = (new Date()).getTime()
+      console.log "the cost of omniship-module's render: #{cur-@nowTime}ms" if process.env.DEBUG?
     # # Conditional Renderer Sample
     # componentWillMount: ->
     #   if layout == 'horizontal'

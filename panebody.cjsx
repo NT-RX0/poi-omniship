@@ -4,46 +4,24 @@
 {Button, ButtonGroup, OverlayTrigger, Tooltip, Overlay, Popover, ProgressBar} = ReactBootstrap
 {__, __n} = require 'i18n'
 Immutable = require 'immutable'
+PureRenderMixin = require 'react-addons-pure-render-mixin'
 
 ShipTile = require './shiptile'
 DeckInfo = require './deckinfo'
 RecoveryBar = require './recoverybar'
 
 PaneBody = React.createClass
-  data:
-    decks: []
-    decksAddition: {}
-      # names: ["#{__ 'I'}", "#{__ 'II'}", "#{__ 'III'}", "#{__ 'IV'}"]
-      # fullnames: [__('No.%s fleet', 1), __('No.%s fleet', 2), __('No.%s fleet', 3), __('No.%s fleet', 4)]
-      # state: [-1, -1, -1, -1]
-      # inBattle: [false, false, false, false]
-      # akashiTimeStamp: 0
-      # ndocks: {}
-      # condRemain: [0, 0, 0, 0]
-      # lv: []
-      # tyku: []
-      # saku25a: []
-      # saku25: []
-      # speed: []
-      # cost: []
-    ships: {}
-    shipsAddition: {}
-      # condTimeStamps: {}
-    combined: {}
-      # 0 is single fleet, 1 for aerial fleet, 2 for water surface fleet
-      # state: 0
-      # goback: []
-  getInitialState: ->
-    null
-  handleResponse: (e) ->
-    {method, path, body, postBody} = e.detail
-    null
+  mixins: [PureRenderMixin]
   componentDidMount: ->
     window.addEventListener 'game.response', @handleResponse
   componentWillUnmount: ->
     window.removeEventListener 'game.response', @handleResponse
-  shouldComponentUpdate: (nextProps, nextState) ->
-    nextProps.activeDeck is @props.deckIndex # and !_.isEqual(nextProps, @props)
+  nowTime: 0
+  componentWillUpdate: (nextProps, nextState) ->
+    @nowTime = (new Date()).getTime()
+  componentDidUpdate: (prevProps, prevState) ->
+    cur = (new Date()).getTime()
+    console.log "the cost of panebody-module's render: #{cur-@nowTime}ms" if process.env.DEBUG?
   render: ->
     <div>
       <OverlayTrigger placement={if (!window.doubleTabbed) && (window.layout == 'vertical') then 'left' else 'top'} overlay={
@@ -73,9 +51,9 @@ PaneBody = React.createClass
             <ShipTile
               key={j}
               shipIndex={j}
-              ship={ship}
-              shipInfo={shipInfo}
-              shipType={shipType}
+              ship={@props.data.decksAddition.shipDetails[@props.deckIndex][j].ship}
+              shipInfo={@props.data.decksAddition.shipDetails[@props.deckIndex][j].shipInfo}
+              shipType={@props.data.decksAddition.shipDetails[@props.deckIndex][j].shipType}
               goback={@props.data.combined.goback}
               label={@props.label[j]}
               />
