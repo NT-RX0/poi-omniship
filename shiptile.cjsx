@@ -4,7 +4,7 @@
 {Button, ButtonGroup} = ReactBootstrap
 {ProgressBar, OverlayTrigger, Tooltip, Alert, Overlay, Label, Panel, Popover} = ReactBootstrap
 {__, __n} = require 'i18n'
-PureRenderMixin = require 'react-addons-pure-render-mixin'
+Immutable = require 'immutable'
 
 
 {reactClass} = require './statuslabel'
@@ -55,15 +55,14 @@ getStatusStyle = (status) ->
     return {}
 
 ShipTile = React.createClass
-  mixins: [PureRenderMixin]
   render: ->
-    {ship, shipInfo, shipType} = @props
+    {ship, shipType} = @props
     <div className="ship-tile">
       <div className="ship-item flex-column" style={getStatusStyle @props.label}>
         <div className="ship-info" >
           <StatusLabel label={@props.label} shipLv={ship.api_lv}/>
           <span className="ship-name">
-            {shipInfo.api_name}
+            {ship.api_name}
           </span>
           <span className="ship-hp-text" style={flex: "none", display: "flex"}>
             {ship.api_nowhp} / {ship.api_maxhp}
@@ -84,12 +83,12 @@ ShipTile = React.createClass
               <ProgressBar style={flex: "auto"} bsStyle={getHpStyle ship.api_nowhp / ship.api_maxhp * 100} now={ship.api_nowhp / ship.api_maxhp * 100} />
             </OverlayTrigger>
             <span className="ship-fuelbullet" style={flex: "none"}>
-              <ProgressBar bsStyle={getMaterialStyle ship.api_fuel / shipInfo.api_fuel_max * 100}
-                           now={ship.api_fuel / shipInfo.api_fuel_max * 100} />
+              <ProgressBar bsStyle={getMaterialStyle ship.api_fuel / ship.api_fuel_max * 100}
+                           now={ship.api_fuel / ship.api_fuel_max * 100} />
             </span>
             <span className="ship-fuelbullet" style={flex: "none"}>
-              <ProgressBar bsStyle={getMaterialStyle ship.api_bull / shipInfo.api_bull_max * 100}
-                           now={ship.api_bull / shipInfo.api_bull_max * 100} />
+              <ProgressBar bsStyle={getMaterialStyle ship.api_bull / ship.api_bull_max * 100}
+                           now={ship.api_bull / ship.api_bull_max * 100} />
             </span>
           </span>
         </div>

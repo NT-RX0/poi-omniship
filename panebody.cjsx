@@ -4,14 +4,13 @@
 {Button, ButtonGroup, OverlayTrigger, Tooltip, Overlay, Popover, ProgressBar} = ReactBootstrap
 {__, __n} = require 'i18n'
 Immutable = require 'immutable'
-PureRenderMixin = require 'react-addons-pure-render-mixin'
+
 
 ShipTile = require './shiptile'
 DeckInfo = require './deckinfo'
 RecoveryBar = require './recoverybar'
 
 PaneBody = React.createClass
-  mixins: [PureRenderMixin]
   componentDidMount: ->
     window.addEventListener 'game.response', @handleResponse
   componentWillUnmount: ->
@@ -52,7 +51,6 @@ PaneBody = React.createClass
               key={j}
               shipIndex={j}
               ship={@props.data.decksAddition.shipDetails[@props.deckIndex][j].ship}
-              shipInfo={@props.data.decksAddition.shipDetails[@props.deckIndex][j].shipInfo}
               shipType={@props.data.decksAddition.shipDetails[@props.deckIndex][j].shipType}
               goback={@props.data.combined.goback}
               label={@props.label[j]}

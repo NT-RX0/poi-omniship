@@ -3,7 +3,6 @@
 {$ships, $shipTypes, _ships, resolveTime} = window
 {ProgressBar} = ReactBootstrap
 
-PureRenderMixin = require 'react-addons-pure-render-mixin'
 
 ###
 @props.deckCondRemain
@@ -13,7 +12,6 @@ PureRenderMixin = require 'react-addons-pure-render-mixin'
 ###
 
 RecoveryBar = React.createClass
-  mixins: [PureRenderMixin]
   componentWillUnmount: ->
     @interval = clearInterval @interval
   # componentDidMount: ->

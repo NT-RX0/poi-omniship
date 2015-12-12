@@ -6,6 +6,7 @@
 {__, __n} = require 'i18n'
 Immutable = require 'immutable'
 PureRenderMixin = require 'react-addons-pure-render-mixin'
+Perf = require('react-addons-perf') if process.env.DEBUG
 
 DataInterface = require './data-interface'
 PaneBody = require './panebody'
@@ -252,7 +253,7 @@ module.exports =
           if damagedShips.length > 0
             toggleModal __('Attention!'), damagedShips.join(' ') + __('is heavily damaged!')
       return unless flag
-      data.decks = window._decks
+      data.decks = window._decks if window._decks?
       # update decks states
       @updateDecksInfo()
       state = []
@@ -264,9 +265,8 @@ module.exports =
       for deck, i in data.decks
         for shipId, j in deck.api_ship
           continue if shipId == -1
-          data.decksAddition.shipDetails[i][j].ship = _ships[shipId]
-          data.decksAddition.shipDetails[i][j].shipInfo = $ships[ship.api_ship_id]
-          data.decksAddition.shipDetails[i][j].shipType = $shipTypes[shipInfo.api_stype].api_name
+          data.decksAddition.shipDetails[i][j].ship = ship = _ships[shipId]
+          data.decksAddition.shipDetails[i][j].shipType = $shipTypes[ship.api_stype].api_name
       @setState
         dataVersion: @state.dataVersion + 1
         data: data
